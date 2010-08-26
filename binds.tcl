@@ -1,5 +1,6 @@
 set binds(msg_pub) []
 set x []
+set ::tcl_interactive 0
 
 proc emit_msg_pub {server msg nick uhost target} {
 	set b "$server $msg $nick $uhost $target"
@@ -21,8 +22,7 @@ proc repeat {server msg nick uhost target} {
 }
 
 # urltitle
-#package require http
-source -encoding utf-8 /usr/share/tcltk/tcl8.5/tcl8/http-2.7.5.tm
+package require http
 
 set useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.1.11) Gecko/20100721 Firefox/3.0.6"
 proc urltitle {server msg nick uhost target} {
@@ -41,7 +41,7 @@ proc geturl {url server target} {
 	set data [http::data $token]
 	http::cleanup $token
 	if {[regexp -- {<title>(.*?)</title>} $data -> title]} {
-		set title [encoding convertfrom identity $title]
+		#set title [encoding convertfrom identity $title]
 		putserv $server "PRIVMSG $target :Title: \002$title"
 		set f [open /home/will/debug.txt w]
 		puts $f $title

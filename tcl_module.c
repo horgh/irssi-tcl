@@ -12,6 +12,10 @@ int interp_init() {
 	interp = Tcl_CreateInterp();
 	if (interp == NULL)
 		return -1;
+	
+	// Allow "package require"s to work
+	Tcl_Init(interp);
+	Tcl_SetServiceMode(TCL_SERVICE_ALL);
 
 	return 1;
 }
@@ -29,6 +33,9 @@ int tcl_command(const char *cmd) {
  * Get string result in Tcl interp
  */
 const char *tcl_result() {
+	// TODO it appears we should use Tcl_GetObjResult and work with
+	// that rather than this or could possibly lose data
+	// see GetStringResult docs
 	return Tcl_GetStringResult(interp);
 }
 
@@ -116,7 +123,8 @@ int putserv(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 	// TODO Does it make sense for this to be here?
 	// Causes error ATM
 	//signal_continue(2, server, cmd);
-	signal_emit("server incoming", 2, server, text);
+	// TODO must not listen for own
+	//signal_emit("server incoming", 2, server, text);
 
 	return TCL_OK;
 }
