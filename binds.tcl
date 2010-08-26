@@ -6,7 +6,7 @@ proc emit_msg_pub {server msg nick uhost target} {
 	set b "$server $msg $nick $uhost $target"
 	set ::x "$b is cool"
 	foreach bind $::binds(msg_pub) {
-		$bind $server "$msg" $nick $uhost $target
+		$bind $server $msg $nick $uhost $target
 	}
 }
 
@@ -41,7 +41,7 @@ proc geturl {url server target} {
 	set data [http::data $token]
 	http::cleanup $token
 	if {[regexp -- {<title>(.*?)</title>} $data -> title]} {
-		#set title [encoding convertfrom identity $title]
+		set title [encoding convertfrom identity $title]
 		putserv $server "PRIVMSG $target :Title: \002$title"
 		set f [open /home/will/debug.txt w]
 		puts $f $title
