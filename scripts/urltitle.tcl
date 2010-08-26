@@ -1,30 +1,11 @@
-set binds(msg_pub) []
-set x []
-set ::tcl_interactive 0
-
-proc emit_msg_pub {server msg nick uhost target} {
-	set b "$server $msg $nick $uhost $target"
-	set ::x "$b is cool"
-	foreach bind $::binds(msg_pub) {
-		$bind $server $msg $nick $uhost $target
-	}
-}
-
-proc bind {type proc_name} {
-	lappend ::binds($type) $proc_name
-}
-
-
-# eg script
-proc repeat {server msg nick uhost target} {
-	putserv $server "PRIVMSG $target :repeated: $msg"
-	#set ::x "Msg: $msg"
-}
-
 # urltitle
+
 package require http
 
 set useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.1.11) Gecko/20100721 Firefox/3.0.6"
+
+bind msg_pub urltitle
+
 proc urltitle {server msg nick uhost target} {
 	if {[regexp -- {(http://\S+)} $msg -> url]} {
 		putserv $server "PRIVMSG $target :Matched $url"
@@ -65,6 +46,3 @@ proc http_done {token} {
 #		putserv 
 #	}
 }
-
-bind msg_pub repeat
-bind msg_pub urltitle

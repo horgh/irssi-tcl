@@ -1,7 +1,12 @@
+/*
+ * 26/08/2010
+ * by Will Storey
+ */
+
 #include <tcl.h>
 #include "tcl_module.h"
 
-#define MAX_CMD_LEN 1024
+#define IRSSI_TCL_PATH "/home/will/code/irssi_tcl/irssi.tcl"
 
 static Tcl_Interp *interp;
 
@@ -42,6 +47,14 @@ const char *tcl_str_result() {
 }
 
 /*
+ * Error string
+ */
+const char *tcl_str_error() {
+	const char *result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
+	return result;
+}
+
+/*
  * Execute the command given with num arguments, num
  * includes the proc name
  *
@@ -79,8 +92,9 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 	if (strcmp(data, "reload") == 0) {
 		if(tcl_reload_scripts() == TCL_OK)
 			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Scripts reloaded");
-		else
-			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure");
+		else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure: %s", tcl_str_error());
+		}
 		return;
 	}
 
@@ -151,7 +165,7 @@ int tcl_register_commands() {
 
 // TODO deal with path
 int tcl_reload_scripts() {
-	return Tcl_EvalFile(interp, "/home/will/code/irssi_tcl/binds.tcl");
+	return Tcl_EvalFile(interp, IRSSI_TCL_PATH);
 }
 
 /*
@@ -171,8 +185,7 @@ void tcl_init(void) {
 	}
 
 	if(tcl_reload_scripts() != TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Setup error");
-		return;
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s", tcl_str_error());
 	}
 
 	command_bind("tcl", NULL, (SIGNAL_FUNC) cmd_tcl);
