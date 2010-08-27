@@ -111,7 +111,7 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
  * Called when "message public" signal from Irssi
  */
 void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target) {
-	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, msg, nick, address, target)) {
+	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
 
 	} else {
 
@@ -127,30 +127,41 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 	//printtext(NULL, NULL, MSGLEVEL_CRAP, "Result: %s", res);
 }
 
+void time_change() {
+	int events = 1;
+	while (events > 0)
+		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
+}
+
 /*
- * putserv tcl interp command
+ * putserv_raw tcl interp command
+ *
+ * TODO:
+ *  - Is IncrRefCount/DecrRefCount needed?
  */
-int putserv(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 3) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv server_tag text\"");
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw server_tag text\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
 
-	// will have putserv
-	//char *cmd = Tcl_GetStringFromObj(objv[0], NULL);
-	char *server_tag = Tcl_GetStringFromObj(objv[1], NULL);
-	char *text = Tcl_GetStringFromObj(objv[2], NULL);
-	SERVER_REC *server = server_find_tag(server_tag);
+	int i;
+	for (i = 0; i < objc; i++)
+		Tcl_IncrRefCount(objv[i]);
 
-	//printf("\ntag: %s cmd: %s text: %s\n", server_tag, cmd, text);
-	irc_send_cmdv((IRC_SERVER_REC *) server, text);
-	//server_command(text, server, NULL);
-	// TODO Does it make sense for this to be here?
-	// Causes error ATM
-	//signal_continue(2, server, cmd);
-	// TODO must not listen for own
+	// will have putserv_raw
+	//char *cmd = Tcl_GetStringFromObj(objv[0], NULL);
+	char *server_tag = Tcl_GetString(objv[1]);
+	char *text = Tcl_GetString(objv[2]);
+	SERVER_REC *server = server_find_tag(server_tag);
+	irc_send_cmd((IRC_SERVER_REC *) server, text);
+
+	// TODO need this; but must not listen for own
 	//signal_emit("server incoming", 2, server, text);
+
+	for (i = 0; i < objc; i++)
+		Tcl_DecrRefCount(objv[i]);
 
 	return TCL_OK;
 }
@@ -159,11 +170,10 @@ int putserv(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const 
  * Add these commands as commands in the Tcl interpreter
  */
 int tcl_register_commands() {
-	Tcl_CreateObjCommand(interp, "putserv", putserv, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "putserv_raw", putserv_raw, NULL, NULL);
 	return 1;
 }
 
-// TODO deal with path
 int tcl_reload_scripts() {
 	return Tcl_EvalFile(interp, IRSSI_TCL_PATH);
 }
@@ -191,6 +201,7 @@ void tcl_init(void) {
 	command_bind("tcl", NULL, (SIGNAL_FUNC) cmd_tcl);
 
 	signal_add("message public", (SIGNAL_FUNC) msg_pub);
+	signal_add("expando timer", (SIGNAL_FUNC) time_change);
 }
 
 /*

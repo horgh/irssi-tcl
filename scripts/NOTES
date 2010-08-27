@@ -1,0 +1,2 @@
+Eggdrop to Irssi script:
+google.tcl: util script + add server to google::output { calls, and all parents of where output is called

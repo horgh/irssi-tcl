@@ -1,15 +1,50 @@
-set binds(msg_pub) []
+set SCRIPT_PATH /home/will/code/irssi_tcl/scripts
+
+set signals(msg_pub) []
 set ::tcl_interactive 0
 
-proc emit_msg_pub {server msg nick uhost target} {
-	foreach bind $::binds(msg_pub) {
-		$bind $server $msg $nick $uhost $target
+proc putserv {server_tag text} {
+	regsub -all -- {\n} $text " " text
+	regsub -all -- {\t} $text "" text
+	set text [string trim $text]
+	putserv_raw $server_tag $text
+}
+
+proc emit_msg_pub {server nick uhost target msg} {
+	set l [split $msg]
+	set keyword [lindex $l 0]
+	set rest [join [lrange $l 1 end]]
+	foreach bind $::signals(msg_pub) {
+		set bind_keyword [lindex $bind 0]
+		set bind_proc [lindex $bind 1]
+		if {[string match -nocase $bind_keyword $keyword]} {
+			# We want to include first word if capturing all
+			if {$bind_keyword == "*"} {
+				{*}$bind_proc $server $nick $uhost $target $msg
+			} else {
+				{*}$bind_proc $server $nick $uhost $target $rest
+			}
+		}
 	}
 }
 
-proc bind {type proc_name} {
-	lappend ::binds($type) $proc_name
+# e.g. signal_add msg_pub "!google" google_proc
+proc signal_add {type keyword proc_name} {
+	lappend ::signals($type) [list $keyword $proc_name]
 }
 
-source scripts/repeat.tcl
-source scripts/urltitle.tcl
+proc load_script {script} {
+	source ${::SCRIPT_PATH}/$script
+}
+
+proc bgerror {msg} {
+	puts "Got error: $msg."
+	set f [open /home/will/debug.txt w]
+	puts $f "Got error $msg"
+	close $f
+}
+
+#load_script repeat.tcl
+load_script urltitle.tcl
+load_script egg_compat.tcl
+load_script google.tcl

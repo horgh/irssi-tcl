@@ -1,7 +1,7 @@
 # Repeat everything!
 
-bind msg_pub repeat
+signal_add msg_pub "*" repeat
 
-proc repeat {server msg nick uhost target} {
+proc repeat {server nick uhost target msg} {
 	putserv $server "PRIVMSG $target :repeated: $msg"
 }
