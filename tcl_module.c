@@ -98,12 +98,12 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 		return;
 	}
 
-	printtext(NULL, NULL, MSGLEVEL_CRAP, "Running /tcl: '%s'", data);
+	printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Running /tcl: '%s'", data);
 	if (tcl_command(data)) {
 		const char *res = tcl_str_result();
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Result: %s", res);
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result: %s", res);
 	} else {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Error executing /tcl command: %s", data);
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl command: %s", data);
 	}
 }
 
@@ -112,21 +112,14 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
  */
 void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
-
-	} else {
-
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal");
 	}
-
-	printtext(NULL, NULL, MSGLEVEL_CRAP, "%s %s %s %s %s", server->tag, msg, nick, address, target);
-//	if (tcl_command(cmd))
-//		printtext(NULL, NULL, MSGLEVEL_CRAP, "cmd: %s", cmd);
-//	else
-//		printtext(NULL, NULL, MSGLEVEL_CRAP, "Error executing tcl command: %s", cmd);
-	// TODO do we really need to check result here? Seems not.
-	//const char *res = tcl_str_result();
-	//printtext(NULL, NULL, MSGLEVEL_CRAP, "Result: %s", res);
 }
 
+/*
+ * Ugly hack to check Tcl events!
+ * TODO: Look into hooking into as glib event source
+ */
 void time_change() {
 	int events = 1;
 	while (events > 0)
@@ -150,8 +143,7 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 	for (i = 0; i < objc; i++)
 		Tcl_IncrRefCount(objv[i]);
 
-	// will have putserv_raw
-	//char *cmd = Tcl_GetStringFromObj(objv[0], NULL);
+	// objv[0] has "putserv_raw"
 	char *server_tag = Tcl_GetString(objv[1]);
 	char *text = Tcl_GetString(objv[2]);
 	SERVER_REC *server = server_find_tag(server_tag);
@@ -159,6 +151,27 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
 	// TODO need this; but must not listen for own
 	//signal_emit("server incoming", 2, server, text);
+
+	for (i = 0; i < objc; i++)
+		Tcl_DecrRefCount(objv[i]);
+	return TCL_OK;
+}
+
+/*
+ * Print string to Irssi from Tcl
+ */
+int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	if (objc != 2) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_print string\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	int i;
+	for (i = 0; i < objc; i++)
+		Tcl_IncrRefCount(objv[i]);
+	
+	char *str = Tcl_GetString(objv[1]);
+	printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: %s", str);
 
 	for (i = 0; i < objc; i++)
 		Tcl_DecrRefCount(objv[i]);
@@ -171,6 +184,7 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
  */
 int tcl_register_commands() {
 	Tcl_CreateObjCommand(interp, "putserv_raw", putserv_raw, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "irssi_print", irssi_print, NULL, NULL);
 	return 1;
 }
 
@@ -200,15 +214,16 @@ void tcl_init(void) {
 
 	command_bind("tcl", NULL, (SIGNAL_FUNC) cmd_tcl);
 
-	signal_add("message public", (SIGNAL_FUNC) msg_pub);
-	signal_add("expando timer", (SIGNAL_FUNC) time_change);
+	signal_add_first("message public", (SIGNAL_FUNC) msg_pub);
+	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
 }
 
 /*
  * Irssi module unload
  */
 void tcl_deinit(void) {
+	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
+	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
 	command_unbind("tcl", (SIGNAL_FUNC) cmd_tcl);
-
 	Tcl_DeleteInterp(interp);
 }

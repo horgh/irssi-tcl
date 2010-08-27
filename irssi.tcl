@@ -2,6 +2,14 @@ set SCRIPT_PATH /home/will/code/irssi_tcl/scripts
 
 set signals(msg_pub) []
 set ::tcl_interactive 0
+#interp bgerror {} ::bgerror
+
+proc bgerror {msg} {
+	irssi_print "Error: $msg"
+	#set f [open /home/will/debug.txt w]
+	#puts $f "Got error $msg"
+	#close $f
+}
 
 proc putserv {server_tag text} {
 	regsub -all -- {\n} $text " " text
@@ -35,13 +43,6 @@ proc signal_add {type keyword proc_name} {
 
 proc load_script {script} {
 	source ${::SCRIPT_PATH}/$script
-}
-
-proc bgerror {msg} {
-	puts "Got error: $msg."
-	set f [open /home/will/debug.txt w]
-	puts $f "Got error $msg"
-	close $f
 }
 
 #load_script repeat.tcl

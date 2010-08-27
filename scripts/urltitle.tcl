@@ -52,7 +52,6 @@ proc http_done {server target token} {
 	puts "Got code $code"
 	puts "Meta $meta"
 	puts "Got data $data"
-	sdflskdfjsdf
 
 	# Follow redirects
 	if {[regexp -- {30[01237]} $code]} {
