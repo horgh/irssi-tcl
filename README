@@ -1,0 +1,44 @@
+1. Requirements
+
+To build the module you need:
+- Irssi and Irssi development files
+- glib2 development files
+- Tcl 8.5+ and Tcl 8.5+ development files
+
+It's possible it will work with older Tcl versions, but I haven't tested. Nor
+have I tested with higher than 8.5 actually.
+
+2. Building
+
+Try running 'make'. If it fails, check the -I directories listed in the Makefile
+actually exist. They may be at a different location on your system (such as in
+/usr/local/include and /usr/local/lib). You will need to alter them until they
+are all correct if they are not.
+
+3. Installing
+
+'make install'
+This will place libtcl.so in ~/.irssi/modules and Tcl scripts into ~/.irssi/tcl
+
+Alternatively you can manually copy libtcl.so where you would like it, but the
+module will look in ~/.irssi/tcl for scripts.
+
+4. Usage
+
+To load the module:
+/load tcl
+
+To autoload the module:
+echo "load tcl" >> ~/.irssi/startup
+
+5. Examples
+
+Run a command in the Tcl interpreter:
+/tcl <command ...>
+e.g.
+/tcl set a [expr 5+5]
+
+Reload Tcl scripts:
+/tcl reload
+
+See the "tcl" section in /set for Tcl script settings.

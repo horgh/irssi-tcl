@@ -6,8 +6,14 @@ INCLUDES =-I/usr/include/tcl8.5 -I/usr/include/irssi -I/usr/include/irssi/src -I
 
 all: libtcl.so
 
-libtcl.so: tcl_module.c
+libtcl.so: tcl_module.c tcl_module.h
 	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) -o $@ $< $(DFLAGS)
+
+install: libtcl.so
+	mkdir -p ~/.irssi/modules
+	cp libtcl.so ~/.irssi/modules
+	mkdir -p ~/.irssi/tcl
+	cp ./tcl/* ~/.irssi/tcl
 
 clean:
 	rm libtcl.so

@@ -1,6 +1,9 @@
 /*
  * 26/08/2010
  * by Will Storey
+ *
+ * TODO:
+ *  - fix so we aren't using the hack "expando timer" signal!
  */
 
 #include <tcl.h>

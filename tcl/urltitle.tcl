@@ -41,7 +41,7 @@ proc urltitle::extract_title {data} {
 proc urltitle::geturl {url server target} {
 	http::config -useragent $urltitle::useragent
 	set token [http::geturl $url -blocksize $urltitle::max_bytes \
-		-progress http_progress -command "urltitle::http_done $server $target"]
+		-progress urltitle::http_progress -command "urltitle::http_done $server $target"]
 }
 
 # stop after max_bytes
