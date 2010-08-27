@@ -5,87 +5,48 @@
 
 #include <tcl.h>
 #include "tcl_module.h"
-
-#define IRSSI_TCL_PATH "/home/will/code/irssi_tcl/irssi.tcl"
+#include "debug.h"
 
 static Tcl_Interp *interp;
 
+void init_commands();
+void deinit_commands();
+static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item);
+void init_signals();
+void deinit_signals();
+void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target);
+void time_change();
+int tcl_register_commands();
+int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int interp_init();
+int tcl_command(const char *cmd);
+const char *tcl_str_result();
+const char *tcl_str_error();
+int execute(int num, ...);
+void irssi_dir_ds (Tcl_DString *dsPtr, char *str);
+int tcl_reload_scripts();
+void tcl_init(void);
+void tcl_deinit(void);
+
 /*
- * Setup the Tcl interp
+ * Irssi /commands
  */
-int interp_init() {
-	interp = Tcl_CreateInterp();
-	if (interp == NULL)
-		return -1;
-	
-	// Allow "package require"s to work
-	Tcl_Init(interp);
-	Tcl_SetServiceMode(TCL_SERVICE_ALL);
 
-	// Encoding. Force utf-8 for now
-	Tcl_SetSystemEncoding(interp, "utf-8");
+void init_commands() {
+	command_bind("tcl", NULL, (SIGNAL_FUNC) cmd_tcl);
+}
 
-	return 1;
+void deinit_commands() {
+	command_unbind("tcl", (SIGNAL_FUNC) cmd_tcl);
 }
 
 /*
- * Execute command cmd in Tcl interp
- */
-int tcl_command(const char *cmd) {
-	if (Tcl_Eval(interp, cmd) == TCL_OK)
-		return -1;
-	return 1;
-}
-
-/*
- * Get string result in Tcl interp
- */
-const char *tcl_str_result() {
-	Tcl_Obj *obj = Tcl_GetObjResult(interp);
-	const char *str = Tcl_GetString(obj);
-	return str;
-}
-
-/*
- * Error string
- */
-const char *tcl_str_error() {
-	const char *result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
-	return result;
-}
-
-/*
- * Execute the command given with num arguments, num
- * includes the proc name
- *
- * Arguments must be valid C-strings.
- */
-int execute(int num, ...) {
-	int i;
-	char *arg;
-	va_list vl;
-	va_start(vl, num);
-
-	// create stringobjs and add to objv
-	Tcl_Obj **objv = (Tcl_Obj **) ckalloc(num * sizeof(Tcl_Obj *));
-	for (i = 0; i < num; i++) {
-		arg = va_arg(vl, char *);
-		objv[i] = Tcl_NewStringObj(arg, strlen(arg));
-		Tcl_IncrRefCount(objv[i]);
-	}
-	va_end(vl);
-	int result = Tcl_EvalObjv(interp, num, objv, TCL_EVAL_DIRECT);
-	// Ensure string objects get freed
-	for (i = 0; i < num; i++) {
-		Tcl_DecrRefCount(objv[i]);
-	}
-	ckfree((char *) objv);
-
-	return result;
-}
-
-/*
- * Irssi command /tcl
+ * /tcl
+ * /tcl reload
  */
 static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 	// /tcl reload
@@ -108,6 +69,20 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 }
 
 /*
+ * Signals
+ */
+
+void init_signals() {
+	signal_add_first("message public", (SIGNAL_FUNC) msg_pub);
+	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
+}
+
+void deinit_signals() {
+	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
+	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
+}
+
+/*
  * Called when "message public" signal from Irssi
  */
 void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target) {
@@ -124,6 +99,38 @@ void time_change() {
 	int events = 1;
 	while (events > 0)
 		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
+}
+
+/*
+ * Tcl interpreter commands
+ */
+
+int tcl_register_commands() {
+	Tcl_CreateObjCommand(interp, "putserv_raw", putserv_raw, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "irssi_print", irssi_print, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "settings_get", settings_get, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "settings_add_str", settings_add_str_tcl, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "irssi_dir", irssi_dir, NULL, NULL);
+	return 1;
+}
+
+/*
+ * Return string corresponding to full path to ~/.irssi
+ */
+int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	if (objc != 1) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw server_tag text\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	Tcl_DString dsPtr;
+	Tcl_DStringInit(&dsPtr);
+	irssi_dir_ds(&dsPtr, "");
+
+	void irssi_dir_ds (Tcl_DString *dsPtr, char *str);
+	Tcl_DStringResult(interp, &dsPtr);
+
+	return TCL_OK;
 }
 
 /*
@@ -233,18 +240,108 @@ int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tc
 }
 
 /*
- * Add these commands as commands in the Tcl interpreter
+ * Foundation functions
  */
-int tcl_register_commands() {
-	Tcl_CreateObjCommand(interp, "putserv_raw", putserv_raw, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "irssi_print", irssi_print, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "settings_get", settings_get, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "settings_add_str", settings_add_str_tcl, NULL, NULL);
+
+/*
+ * Setup the Tcl interp
+ */
+int interp_init() {
+	interp = Tcl_CreateInterp();
+	if (interp == NULL)
+		return -1;
+	
+	// Allow "package require"s to work
+	Tcl_Init(interp);
+	Tcl_SetServiceMode(TCL_SERVICE_ALL);
+
+	// Encoding. Force utf-8 for now
+	Tcl_SetSystemEncoding(interp, "utf-8");
+
 	return 1;
 }
 
+/*
+ * Execute command cmd in Tcl interp
+ */
+int tcl_command(const char *cmd) {
+	if (Tcl_Eval(interp, cmd) == TCL_OK)
+		return -1;
+	return 1;
+}
+
+/*
+ * Get string result in Tcl interp
+ */
+const char *tcl_str_result() {
+	Tcl_Obj *obj = Tcl_GetObjResult(interp);
+	const char *str = Tcl_GetString(obj);
+	return str;
+}
+
+/*
+ * Error string
+ */
+const char *tcl_str_error() {
+	const char *result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
+	return result;
+}
+
+/*
+ * Execute the command given with num arguments, num
+ * includes the proc name
+ *
+ * Arguments must be valid C-strings.
+ */
+int execute(int num, ...) {
+	int i;
+	char *arg;
+	va_list vl;
+	va_start(vl, num);
+
+	// create stringobjs and add to objv
+	Tcl_Obj **objv = (Tcl_Obj **) ckalloc(num * sizeof(Tcl_Obj *));
+	for (i = 0; i < num; i++) {
+		arg = va_arg(vl, char *);
+		objv[i] = Tcl_NewStringObj(arg, strlen(arg));
+		Tcl_IncrRefCount(objv[i]);
+	}
+	va_end(vl);
+	int result = Tcl_EvalObjv(interp, num, objv, TCL_EVAL_DIRECT);
+	// Ensure string objects get freed
+	for (i = 0; i < num; i++) {
+		Tcl_DecrRefCount(objv[i]);
+	}
+	ckfree((char *) objv);
+
+	return result;
+}
+
+/*
+ * Append full path to ~/.irssi and str to given DString
+ *
+ * Note: str must be a valid c-string
+ */
+void irssi_dir_ds (Tcl_DString *dsPtr, char *str) {
+	// full path to ~/.irssi
+	const char *irssi_dir = get_irssi_dir();
+	Tcl_DStringAppend(dsPtr, irssi_dir, strlen(irssi_dir));
+
+	// now ~/.irssi/tcl/irssi.tcl
+	Tcl_DStringAppend(dsPtr, str, strlen(str));
+}
+
 int tcl_reload_scripts() {
-	return Tcl_EvalFile(interp, IRSSI_TCL_PATH);
+	#ifdef DEBUG
+	return Tcl_EvalFile(interp, DEBUG_TCL_PATH);
+	#else
+	Tcl_DString dsPtr;
+	Tcl_DStringInit(&dsPtr);
+	irssi_dir_ds(&dsPtr, "/tcl/irssi.tcl");
+	int result = Tcl_EvalFile(interp, Tcl_DStringValue(&dsPtr));
+	Tcl_DStringFree(&dsPtr);
+	return result;
+	#endif
 }
 
 /*
@@ -267,18 +364,15 @@ void tcl_init(void) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s", tcl_str_error());
 	}
 
-	command_bind("tcl", NULL, (SIGNAL_FUNC) cmd_tcl);
-
-	signal_add_first("message public", (SIGNAL_FUNC) msg_pub);
-	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
+	init_commands();
+	init_signals();
 }
 
 /*
  * Irssi module unload
  */
 void tcl_deinit(void) {
-	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
-	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
-	command_unbind("tcl", (SIGNAL_FUNC) cmd_tcl);
+	deinit_commands();
+	deinit_signals();
 	Tcl_DeleteInterp(interp);
 }
