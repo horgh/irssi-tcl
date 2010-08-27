@@ -12,6 +12,31 @@
 
 static Tcl_Interp *interp;
 
+typedef struct {
+	const char *type;
+	const void *func;
+} Signal;
+
+typedef struct {
+	const char *cmd;
+	const void *func;
+} TclCmd;
+
+static const Signal SignalTable[] = {
+	{"message public", msg_pub},
+	{"expando timer", time_change},
+	{NULL, NULL}
+};
+
+static const TclCmd TclCmdTable[] = {
+	{"putserv_raw", putserv_raw},
+	{"irssi_print", irssi_print},
+	{"settings_get", settings_get},
+	{"settings_add_str", settings_add_str_tcl},
+	{"irssi_dir", irssi_dir},
+	{NULL, NULL}
+};
+
 /*
  * Irssi /commands
  */
@@ -53,13 +78,15 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
  */
 
 void init_signals() {
-	signal_add_first("message public", (SIGNAL_FUNC) msg_pub);
-	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
+	int i;
+	for (i = 0; SignalTable[i].type != NULL; i++)
+		signal_add_first(SignalTable[i].type, (SIGNAL_FUNC) SignalTable[i].func);
 }
 
 void deinit_signals() {
-	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
-	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
+	int i;
+	for (i = 0; SignalTable[i].type != NULL; i++)
+		signal_remove(SignalTable[i].type, (SIGNAL_FUNC) SignalTable[i].func);
 }
 
 /*
@@ -85,13 +112,10 @@ void time_change() {
  * Tcl interpreter commands
  */
 
-int tcl_register_commands() {
-	Tcl_CreateObjCommand(interp, "putserv_raw", putserv_raw, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "irssi_print", irssi_print, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "settings_get", settings_get, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "settings_add_str", settings_add_str_tcl, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "irssi_dir", irssi_dir, NULL, NULL);
-	return 1;
+void tcl_register_commands() {
+	int i;
+	for (i = 0; TclCmdTable[i].cmd != NULL; i++)
+		Tcl_CreateObjCommand(interp, TclCmdTable[i].cmd, TclCmdTable[i].func, NULL, NULL);
 }
 
 /*
@@ -303,10 +327,7 @@ void tcl_init(void) {
 		return;
 	}
 
-	if (!tcl_register_commands()) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Command setup error");
-		return;
-	}
+	tcl_register_commands();
 
 	if(tcl_reload_scripts() != TCL_OK) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s", tcl_str_error());
