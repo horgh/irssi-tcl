@@ -1,9 +1,9 @@
-TCL_DIR=/usr/include/tcl8.5
-IRSSI_DIR=/usr/include/irssi
-GLIB2_DIR=/usr/include/glib-2.0
-GLIB2_DIR_2=/usr/lib/glib-2.0
-LIB_DIR=/usr/lib
-TCL_LIB=tcl8.5
+TCL_DIR=/usr/local/include/tcl8.5
+IRSSI_DIR=/usr/local/include/irssi
+GLIB2_DIR=/usr/local/include/glib-2.0
+GLIB2_DIR_2=
+LIB_DIR=/usr/local/lib
+TCL_LIB=tcl85
 
 TCL_INCLUDES=-I$(TCL_DIR)
 IRSSI_INCLUDES=-I$(IRSSI_DIR) -I$(IRSSI_DIR)/src -I$(IRSSI_DIR)/src/core -I$(IRSSI_DIR)/src/fe-common/core -I$(IRSSI_DIR)/src/irc/core
