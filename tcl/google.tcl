@@ -86,21 +86,21 @@ proc google::convert {server nick uhost chan argv} {
 	if {![channel get $chan google]} { return }
 
 	if {[string length $argv] == 0} {
-		$google::output_cmd $server "PRIVMSG $chan :Please provide a query."
+		putchan $server $chan "Please provide a query."
 		return
 	}
 
 	if {[catch {google::convert_fetch $argv} data]} {
-		$google::output_cmd $server "PRIVMSG $chan :Error fetching results: $data."
+		putchan $server $chan "Error fetching results: $data."
 		return
 	}
 
 	if {[catch {google::convert_parse $data} result]} {
-		$google::output_cmd $server "PRIVMSG $chan :Error: $result."
+		putchan $server $chan "Error: $result."
 		return
 	}
 
-	$google::output_cmd $server "PRIVMSG $chan :\002$result\002"
+	putchan $server $chan "\002$result\002"
 }
 
 # Output for results from api query
@@ -108,7 +108,7 @@ proc google::output {server chan url title content} {
 	regsub -all -- {(?:<b>|</b>)} $title "\002" title
 	regsub -all -- {<.*?>} $title "" title
 	set output "$title @ $url"
-	$google::output_cmd $server "PRIVMSG $chan :[htmlparse::mapEscapes $output]"
+	putchan $server $chan "[htmlparse::mapEscapes $output]"
 }
 
 # Return results from API query of $url
@@ -157,7 +157,7 @@ proc google::api_validate {argv url} {
 # Query api
 proc google::api_handler {server chan argv url {num {}}} {
 	if {[catch {google::api_validate $argv $url} results]} {
-		$google::output_cmd $server "PRIVMSG $chan :$results"
+		putchan $server $chan "$results"
 		return
 	}
 

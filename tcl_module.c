@@ -22,10 +22,16 @@ typedef struct {
 	const void *func;
 } TclCmd;
 
-static const Signal SignalTable[] = {
+// added with signal_add_first
+static const Signal SignalTableFirst[] = {
 	{"message public", msg_pub},
 	{"expando timer", time_change},
-	{"message own_public", msg_pub_own},
+	{NULL, NULL}
+};
+
+// added with signal_add_last
+static const Signal SignalTableLast[] = {
+	{"server sendmsg", server_sendmsg},
 	{NULL, NULL}
 };
 
@@ -81,14 +87,18 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 
 void init_signals() {
 	int i;
-	for (i = 0; SignalTable[i].type != NULL; i++)
-		signal_add_first(SignalTable[i].type, (SIGNAL_FUNC) SignalTable[i].func);
+	for (i = 0; SignalTableFirst[i].type != NULL; i++)
+		signal_add_first(SignalTableFirst[i].type, (SIGNAL_FUNC) SignalTableFirst[i].func);
+	for (i = 0; SignalTableLast[i].type != NULL; i++)
+		signal_add_last(SignalTableLast[i].type, (SIGNAL_FUNC) SignalTableLast[i].func);
 }
 
 void deinit_signals() {
 	int i;
-	for (i = 0; SignalTable[i].type != NULL; i++)
-		signal_remove(SignalTable[i].type, (SIGNAL_FUNC) SignalTable[i].func);
+	for (i = 0; SignalTableFirst[i].type != NULL; i++)
+		signal_remove(SignalTableFirst[i].type, (SIGNAL_FUNC) SignalTableFirst[i].func);
+	for (i = 0; SignalTableLast[i].type != NULL; i++)
+		signal_remove(SignalTableLast[i].type, (SIGNAL_FUNC) SignalTableLast[i].func);
 }
 
 /*
@@ -101,11 +111,12 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 }
 
 /*
- * Called when "message public_own" signal from Irssi
+ * Triggers on message sent by self, but not those sent by message own_public
+ * (so that we can work with pub triggers that we trigger ourself)
  */
-void msg_pub_own(SERVER_REC *server, char *msg, const char *target) {
+void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, "", "", target, msg)) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (own) signal");
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal");
 	}
 }
 

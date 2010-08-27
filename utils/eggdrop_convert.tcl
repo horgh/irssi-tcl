@@ -16,13 +16,18 @@ set data [read -nonewline $f]
 close $f
 
 foreach line [split $data \n] {
+	# Replace proc with hand argument to have no hand arg, but have
+	# server as first argument
 	if {[regexp -- {proc.* hand } $line]} {
 		set line [regsub -all -- { hand } $line " "]
 		set line [regsub -- {\{} $line "\{server "]
+
+	# Replace putserv with putserv $server unless:
 	# I use variable output_cmd putserv in some scripts, don't replace that
 	} elseif {[regexp -- {^[^(variable)]putserv} $line]} {
 		set line [regsub -- {putserv} $line {putserv $server}]
-	# Deal with this case of mine
+
+	# Deal with this case directly above of mine
 	} elseif {[regexp -- {::output_cmd} $line]} {
 		set line [regsub -- {::output_cmd} $line {::output_cmd $server}]
 	}

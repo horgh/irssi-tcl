@@ -7,6 +7,7 @@
 
 package require http
 package require tls
+package require htmlparse
 
 namespace eval urltitle {
 	variable useragent "Lynx/2.8.7rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/0.9.8n"
@@ -33,7 +34,7 @@ proc urltitle::urltitle {server nick uhost target msg} {
 proc urltitle::extract_title {data} {
 	if {[regexp -nocase -- {<title>(.*?)</title>} $data -> title]} {
 		set title [encoding convertfrom identity $title]
-		return $title
+		return [htmlparse::mapEscapes $title]
 	}
 	return ""
 }

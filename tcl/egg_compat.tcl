@@ -9,6 +9,8 @@
 #  3. alter all putserv/puthelp calls to have $server as their first argument
 #   e.g. putserv "PRIVMSG $chan :Hello there"
 #     -> putserv $server "PRIVMSG $chan :Hello there"
+#   NOTE: putserv will not show output in Irssi. It is better to replace putserv
+#     with putchan $server $chan "$text" which will (if a public message...)
 #  4. possible gotcha of the above: any calls that are not in the procs that
 #     are bound directly which use putserv will require an added argument
 #   e.g. proc do_something {chan text} {
@@ -19,6 +21,7 @@
 #        }
 #
 #  The script ./utils/eggdrop_convert.tcl can be used for cases 1-3 (hopefully)
+#  But does not deal with putserv to putchan
 #
 
 # TODO
