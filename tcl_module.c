@@ -9,29 +9,6 @@
 
 static Tcl_Interp *interp;
 
-void init_commands();
-void deinit_commands();
-static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item);
-void init_signals();
-void deinit_signals();
-void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target);
-void time_change();
-int tcl_register_commands();
-int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int interp_init();
-int tcl_command(const char *cmd);
-const char *tcl_str_result();
-const char *tcl_str_error();
-int execute(int num, ...);
-void irssi_dir_ds (Tcl_DString *dsPtr, char *str);
-int tcl_reload_scripts();
-void tcl_init(void);
-void tcl_deinit(void);
-
 /*
  * Irssi /commands
  */
@@ -133,9 +110,6 @@ int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
 /*
  * putserv_raw tcl interp command
- *
- * TODO:
- *  - Is IncrRefCount/DecrRefCount needed?
  */
 int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 3) {
@@ -144,21 +118,16 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 		return TCL_ERROR;
 	}
 
-	int i;
-	for (i = 0; i < objc; i++)
-		Tcl_IncrRefCount(objv[i]);
-
 	// objv[0] has "putserv_raw"
 	char *server_tag = Tcl_GetString(objv[1]);
 	char *text = Tcl_GetString(objv[2]);
 	SERVER_REC *server = server_find_tag(server_tag);
+
 	irc_send_cmd((IRC_SERVER_REC *) server, text);
 
 	// TODO need this; but must not listen for own
 	//signal_emit("server incoming", 2, server, text);
 
-	for (i = 0; i < objc; i++)
-		Tcl_DecrRefCount(objv[i]);
 	return TCL_OK;
 }
 
@@ -171,16 +140,8 @@ int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
-	int i;
-	for (i = 0; i < objc; i++)
-		Tcl_IncrRefCount(objv[i]);
-	
 	char *str = Tcl_GetString(objv[1]);
 	printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: %s", str);
-
-	for (i = 0; i < objc; i++)
-		Tcl_DecrRefCount(objv[i]);
-
 	return TCL_OK;
 }
 
@@ -193,10 +154,6 @@ int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *c
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
-	int i;
-	for (i = 0; i < objc; i++)
-		Tcl_IncrRefCount(objv[i]);
-
 	char *key = Tcl_GetString(objv[1]);
 	const char *value = settings_get_str(key);
 	if (value == NULL) {
@@ -207,9 +164,6 @@ int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
 	Tcl_Obj *str = Tcl_NewStringObj(value, strlen(value));
 	Tcl_SetObjResult(interp, str);
-
-	for (i = 0; i < objc; i++)
-		Tcl_DecrRefCount(objv[i]);
 	return TCL_OK;
 }
 
@@ -224,16 +178,9 @@ int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tc
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
-	int i;
-	for (i = 0; i < objc; i++)
-		Tcl_IncrRefCount(objv[i]);
-
 	char *key = Tcl_GetString(objv[1]);
 	char *def = Tcl_GetString(objv[2]);
 	settings_add_str("tcl", key, def);
-
-	for (i = 0; i < objc; i++)
-		Tcl_DecrRefCount(objv[i]);
 	return TCL_OK;
 }
 
@@ -307,9 +254,8 @@ int execute(int num, ...) {
 	va_end(vl);
 	int result = Tcl_EvalObjv(interp, num, objv, TCL_EVAL_DIRECT);
 	// Ensure string objects get freed
-	for (i = 0; i < num; i++) {
+	for (i = 0; i < num; i++)
 		Tcl_DecrRefCount(objv[i]);
-	}
 	ckfree((char *) objv);
 
 	return result;
