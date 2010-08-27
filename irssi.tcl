@@ -2,15 +2,13 @@ set SCRIPT_PATH /home/will/code/irssi_tcl/scripts
 
 set signals(msg_pub) []
 set ::tcl_interactive 0
-#interp bgerror {} ::bgerror
 
 proc bgerror {msg} {
 	irssi_print "Error: $msg"
-	#set f [open /home/will/debug.txt w]
-	#puts $f "Got error $msg"
-	#close $f
 }
 
+# Do some cleanup before sending to server
+# Strip \n, \t, ending whitespace
 proc putserv {server_tag text} {
 	regsub -all -- {\n} $text " " text
 	regsub -all -- {\t} $text "" text
@@ -39,6 +37,16 @@ proc emit_msg_pub {server nick uhost target msg} {
 # e.g. signal_add msg_pub "!google" google_proc
 proc signal_add {type keyword proc_name} {
 	lappend ::signals($type) [list $keyword $proc_name]
+}
+
+# return 1 if channel is in setting key string (list) $key, 0 otherwise
+proc channel_in_settings_str {key channel} {
+	set channel_str [settings_get $key]
+	set channels [split $channel_str]
+	if {[lsearch -exact -nocase $channels $channel] > -1} {
+		return 1
+	}
+	return 0
 }
 
 proc load_script {script} {

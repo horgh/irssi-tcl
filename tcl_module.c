@@ -180,11 +180,66 @@ int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 }
 
 /*
+ * settings_get Tcl command to get Irssi settings
+ */
+int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	if (objc != 2) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_get settings_key\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	int i;
+	for (i = 0; i < objc; i++)
+		Tcl_IncrRefCount(objv[i]);
+
+	char *key = Tcl_GetString(objv[1]);
+	const char *value = settings_get_str(key);
+	if (value == NULL) {
+		Tcl_Obj *str = Tcl_ObjPrintf("error: setting key not found");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+
+	Tcl_Obj *str = Tcl_NewStringObj(value, strlen(value));
+	Tcl_SetObjResult(interp, str);
+
+	for (i = 0; i < objc; i++)
+		Tcl_DecrRefCount(objv[i]);
+	return TCL_OK;
+}
+
+/*
+ * Add string setting from Tcl
+ *
+ * named this way as conflicts with macro...
+ */
+int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	if (objc != 3) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_add_str key default\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	int i;
+	for (i = 0; i < objc; i++)
+		Tcl_IncrRefCount(objv[i]);
+
+	char *key = Tcl_GetString(objv[1]);
+	char *def = Tcl_GetString(objv[2]);
+	settings_add_str("tcl", key, def);
+
+	for (i = 0; i < objc; i++)
+		Tcl_DecrRefCount(objv[i]);
+	return TCL_OK;
+}
+
+/*
  * Add these commands as commands in the Tcl interpreter
  */
 int tcl_register_commands() {
 	Tcl_CreateObjCommand(interp, "putserv_raw", putserv_raw, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "irssi_print", irssi_print, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "settings_get", settings_get, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "settings_add_str", settings_add_str_tcl, NULL, NULL);
 	return 1;
 }
 

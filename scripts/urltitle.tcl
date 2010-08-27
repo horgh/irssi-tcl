@@ -1,20 +1,36 @@
-# urltitle
+#
+# Fetch title of URLs in channels
+#
+# /set urltitle_enabled_channels #channel1 #channel2 ..
+# to enable
+#
 
 package require http
+package require tls
 
-set ::useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.1.11) Gecko/20100721 Firefox/3.0.6"
+namespace eval urltitle {
+	variable useragent "Lynx/2.8.7rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/0.9.8n"
+	variable max_bytes 32768
 
-signal_add msg_pub "*" urltitle
+	settings_add_str "urltitle_enabled_channels" ""
 
-proc urltitle {server nick uhost target msg} {
-	if {[regexp -nocase -- {(http://\S+)} $msg -> url]} {
-		geturl $url $server $target
+	signal_add msg_pub "*" urltitle::urltitle
+
+	::http::register https 443 ::tls::socket
+}
+
+proc urltitle::urltitle {server nick uhost target msg} {
+	if {![channel_in_settings_str urltitle_enabled_channels $target]} {
+		return
+	}
+	if {[regexp -nocase -- {(https?://\S+)} $msg -> url]} {
+		urltitle::geturl $url $server $target
 	} elseif {[regexp -nocase -- {(www\.\S+)} $msg -> url]} {
-		geturl "http://${url}" $server $target
+		urltitle::geturl "http://${url}" $server $target
 	}
 }
 
-proc extract_title {data} {
+proc urltitle::extract_title {data} {
 	if {[regexp -nocase -- {<title>(.*?)</title>} $data -> title]} {
 		set title [encoding convertfrom identity $title]
 		return $title
@@ -22,41 +38,28 @@ proc extract_title {data} {
 	return ""
 }
 
-proc geturl {url server target} {
-	puts "Geturl begin with $url"
-	http::config -useragent $::useragent
-	set token [http::geturl $url -blocksize 1024 -progress http_progress -command "http_done $server $target"]
-	#set token [http::geturl $url -blocksize 1024 -progress http_progress]
-	#set data [http::data $token]
-	#http::cleanup $token
-	#if {[regexp -nocase -- {<title>(.*?)</title>} $data -> title]} {
-#		set title [encoding convertfrom identity $title]
-#		putserv $server "PRIVMSG $target :Title: \002$title"
-#	} else {
-#		putserv $server "PRIVMSG $target :No title found"
-#	}
+proc urltitle::geturl {url server target} {
+	http::config -useragent $urltitle::useragent
+	set token [http::geturl $url -blocksize $urltitle::max_bytes \
+		-progress http_progress -command "urltitle::http_done $server $target"]
 }
 
-# Stop after 32k
-proc http_progress {token total current} {
+# stop after max_bytes
+proc urltitle::http_progress {token total current} {
 	if {$current >= 32768} {
 		http::reset $token
 	}
 }
 
-proc http_done {server target token} {
+proc urltitle::http_done {server target token} {
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
 	http::cleanup $token
-	puts "Got code $code"
-	puts "Meta $meta"
-	puts "Got data $data"
 
-	# Follow redirects
+	# Follow redirects for some 30* codes
 	if {[regexp -- {30[01237]} $code]} {
-		puts "Redirecting!!!! location is [dict get $meta Location]"
-		geturl [dict get $meta Location] $server $target
+		urltitle::geturl [dict get $meta Location] $server $target
 	} else {
 		set title [extract_title $data]
 		if {$title != ""} {
@@ -64,3 +67,5 @@ proc http_done {server target token} {
 		}
 	}
 }
+
+irssi_print "urltitle.tcl loaded"
