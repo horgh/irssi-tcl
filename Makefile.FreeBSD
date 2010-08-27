@@ -23,10 +23,10 @@ libtcl.so: tcl_module.c tcl_module.h
 	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) -o $@ $(SRC) $(DFLAGS)
 
 install: libtcl.so
-	mkdir -p ~/.irssi/modules
-	cp libtcl.so ~/.irssi/modules
-	mkdir -p ~/.irssi/tcl
-	cp ./tcl/* ~/.irssi/tcl
+	mkdir -p $(HOME)/.irssi/modules
+	cp libtcl.so $(HOME)/.irssi/modules
+	mkdir -p $(HOME)/.irssi/tcl
+	cp ./tcl/* $(HOME)/.irssi/tcl
 
 clean:
 	rm libtcl.so
