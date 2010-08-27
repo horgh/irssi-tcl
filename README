@@ -53,4 +53,5 @@ Notes on some commands:
   cleaning on strings sent such as removing newlines and tabs. If you don't need
   this cleanup, feel free to use the _raw versions
 - putserv is similar to putchan except putchan will show in the Irssi UI (for
-  public channels) the commands being sent to the server
+  public channels) the commands being sent to the server. putserv will not
+	trigger any signals whereas putchan triggers the signal message pub_own

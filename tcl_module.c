@@ -25,6 +25,7 @@ typedef struct {
 static const Signal SignalTable[] = {
 	{"message public", msg_pub},
 	{"expando timer", time_change},
+	{"message own_public", msg_pub_own},
 	{NULL, NULL}
 };
 
@@ -96,6 +97,15 @@ void deinit_signals() {
 void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal");
+	}
+}
+
+/*
+ * Called when "message public_own" signal from Irssi
+ */
+void msg_pub_own(SERVER_REC *server, char *msg, const char *target) {
+	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, "", "", target, msg)) {
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (own) signal");
 	}
 }
 

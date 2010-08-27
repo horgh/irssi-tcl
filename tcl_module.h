@@ -22,6 +22,7 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item);
 void init_signals();
 void deinit_signals();
 void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target);
+void msg_pub_own(SERVER_REC *server, char *msg, const char *target);
 void time_change();
 
 void tcl_register_commands();
