@@ -2,6 +2,8 @@
 # Example script
 # Repeat everything!
 #
+# This might cause infinite loop, I haven't tested in a few revisions.
+#
 
 namespace eval repeat {
 	signal_add msg_pub "*" repeat::repeat

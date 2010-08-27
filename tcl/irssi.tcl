@@ -12,13 +12,23 @@ proc bgerror {msg} {
 	irssi_print "Error: $msg"
 }
 
-# Do some cleanup before sending to server
 # Strip \n, \t, ending whitespace
-proc putserv {server_tag text} {
+proc clean {text} {
 	regsub -all -- {\n} $text " " text
 	regsub -all -- {\t} $text "" text
 	set text [string trim $text]
+	return $text
+}
+
+# Do some cleanup before sending to server
+proc putserv {server_tag text} {
+	set text [clean $text]
 	putserv_raw $server_tag $text
+}
+
+proc putchan {server_tag channel text} {
+	set text [clean $text]
+	putchan_raw $server_tag $channel $text
 }
 
 proc emit_msg_pub {server nick uhost target msg} {

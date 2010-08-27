@@ -63,7 +63,7 @@ proc urltitle::http_done {server target token} {
 	} else {
 		set title [extract_title $data]
 		if {$title != ""} {
-			putserv $server "PRIVMSG $target :\002[string trim $title]"
+			putchan $server $target "\002[string trim $title]"
 		}
 	}
 }

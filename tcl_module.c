@@ -30,6 +30,7 @@ static const Signal SignalTable[] = {
 
 static const TclCmd TclCmdTable[] = {
 	{"putserv_raw", putserv_raw},
+	{"putchan_raw", putchan_raw},
 	{"irssi_print", irssi_print},
 	{"settings_get", settings_get},
 	{"settings_add_str", settings_add_str_tcl},
@@ -137,6 +138,7 @@ int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
 /*
  * putserv_raw tcl interp command
+ * TODO: Any output from this command will not be seen on Irssi side
  */
 int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 3) {
@@ -157,6 +159,29 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
 	return TCL_OK;
 }
+
+/*
+ * putchan_raw <server_tag> <#chan> <text>
+ * Use this instead of putserv so that can see own message
+ *
+ * "raw" because putchan in Tcl will do some string fixing on text
+ */
+ int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	if (objc != 4) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putchan_raw server_tag channel text\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	char *server_tag = Tcl_GetString(objv[1]);
+	char *chan = Tcl_GetString(objv[2]);
+	char *text = Tcl_GetString(objv[3]);
+	SERVER_REC *server = server_find_tag(server_tag);
+	Tcl_Obj *send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", chan, text);
+
+	irc_send_cmd((IRC_SERVER_REC *) server, Tcl_GetString(send_str));
+	signal_emit("message own_public", 3, server, text, chan);
+	return TCL_OK;
+ }
 
 /*
  * Print string to Irssi from Tcl
