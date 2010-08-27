@@ -10,7 +10,13 @@ have I tested with higher than 8.5.* actually.
 
 2. Building
 
-Try running 'make'. If it fails, check the -I directories listed in the Makefile
+Linux:
+Run 'make'
+
+FreeBSD:
+Run 'make -f Makefile.FreeBSD'
+
+Didn't work? If it fails, check the -I directories listed in the Makefile
 actually exist. They may be at a different location on your system (such as in
 /usr/local/include and /usr/local/lib). You will need to alter them until they
 are all correct if they are not.
