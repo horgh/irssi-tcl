@@ -126,10 +126,8 @@ int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 	Tcl_DString dsPtr;
 	Tcl_DStringInit(&dsPtr);
 	irssi_dir_ds(&dsPtr, "");
-
-	void irssi_dir_ds (Tcl_DString *dsPtr, char *str);
 	Tcl_DStringResult(interp, &dsPtr);
-
+	Tcl_DStringFree(&dsPtr);
 	return TCL_OK;
 }
 
@@ -323,25 +321,26 @@ int execute(int num, ...) {
  * Note: str must be a valid c-string
  */
 void irssi_dir_ds (Tcl_DString *dsPtr, char *str) {
+	#ifdef DEBUG
+	const char *irssi_dir = DEBUG_IRSSI_PATH;
+	#else
 	// full path to ~/.irssi
 	const char *irssi_dir = get_irssi_dir();
+	#endif
+
 	Tcl_DStringAppend(dsPtr, irssi_dir, strlen(irssi_dir));
 
-	// now ~/.irssi/tcl/irssi.tcl
+	// now ~/.irssi/str
 	Tcl_DStringAppend(dsPtr, str, strlen(str));
 }
 
 int tcl_reload_scripts() {
-	#ifdef DEBUG
-	return Tcl_EvalFile(interp, DEBUG_TCL_PATH);
-	#else
 	Tcl_DString dsPtr;
 	Tcl_DStringInit(&dsPtr);
 	irssi_dir_ds(&dsPtr, "/tcl/irssi.tcl");
 	int result = Tcl_EvalFile(interp, Tcl_DStringValue(&dsPtr));
 	Tcl_DStringFree(&dsPtr);
 	return result;
-	#endif
 }
 
 /*

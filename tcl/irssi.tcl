@@ -1,4 +1,9 @@
-set SCRIPT_PATH /home/will/code/irssi_tcl/scripts
+#
+# Irssi Tcl interpreter util script
+#
+
+# SCRIPT_PATH is relative to ~/.irssi
+set SCRIPT_PATH /tcl
 
 set signals(msg_pub) []
 set ::tcl_interactive 0
@@ -50,7 +55,7 @@ proc channel_in_settings_str {key channel} {
 }
 
 proc load_script {script} {
-	source ${::SCRIPT_PATH}/$script
+	source [irssi_dir]${::SCRIPT_PATH}/${script}
 }
 
 #load_script repeat.tcl
