@@ -10,6 +10,10 @@ have I tested with higher than 8.5.* actually.
 
 2. Building
 
+You should check that I remembered to comment out #include "debug.h". If this
+is included, the module will search for scripts in a directory that you won't
+have.
+
 Linux:
 Run 'make'
 
@@ -23,7 +27,7 @@ are all correct if they are not.
 
 3. Installing
 
-'make install'
+'make install' (or 'make -f Makefile.FreeBSD install')
 This will place libtcl.so in ~/.irssi/modules and Tcl scripts into ~/.irssi/tcl
 
 Alternatively you can manually copy libtcl.so where you would like it, but the
