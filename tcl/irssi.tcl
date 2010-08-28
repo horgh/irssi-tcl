@@ -33,8 +33,11 @@ proc putchan {server_tag channel text} {
 
 proc emit_msg_pub {server nick uhost target msg} {
 	set l [split $msg]
+
+	# first word is keyword
 	set keyword [lindex $l 0]
 	set rest [join [lrange $l 1 end]]
+
 	foreach bind $::signals(msg_pub) {
 		set bind_keyword [lindex $bind 0]
 		set bind_proc [lindex $bind 1]
@@ -72,3 +75,4 @@ proc load_script {script} {
 load_script urltitle.tcl
 load_script egg_compat.tcl
 load_script google.tcl
+load_script calc.tcl

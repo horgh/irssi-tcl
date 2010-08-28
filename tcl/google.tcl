@@ -46,7 +46,7 @@ namespace eval google {
 	bind pub	-|- "!images" google::images
 	bind pub	-|- "!convert" google::convert
 
-	setudef flag google
+	settings_add_str "google_enabled_channels" ""
 }
 
 proc google::convert_fetch {terms} {
@@ -176,28 +176,38 @@ proc google::api_handler {server chan argv url {num {}}} {
 
 # Regular API search
 proc google::search {server nick uhost chan argv} {
-	if {![channel get $chan google]} { return }
+	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+		return
+	}
 
 	google::api_handler $server $chan $argv ${google::api_url}web
 }
 
 # Regular API search, 1 result
 proc google::search1 {server nick uhost chan argv} {
-	if {![channel get $chan google]} { return }
+	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+		return
+	}
 
 	google::api_handler $server $chan $argv ${google::api_url}web 1
 }
 
 # News from API
 proc google::news {server nick uhost chan argv} {
-	if {![channel get $chan google]} { return }
+	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+		return
+	}
 
 	google::api_handler $server $chan $argv ${google::api_url}news
 }
 
 # Images from API
 proc google::images {server nick uhost chan argv} {
-	if {![channel get $chan google]} { return }
+	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+		return
+	}
 
 	google::api_handler $server $chan $argv ${google::api_url}images
 }
+
+irssi_print "google.tcl loaded"
