@@ -33,7 +33,6 @@ proc urltitle::urltitle {server nick uhost target msg} {
 
 proc urltitle::extract_title {data} {
 	if {[regexp -nocase -- {<title>(.*?)</title>} $data -> title]} {
-		set title [encoding convertfrom identity $title]
 		return [htmlparse::mapEscapes $title]
 	}
 	return ""
