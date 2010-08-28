@@ -185,19 +185,19 @@ proc google::search {server nick uhost chan argv} {
 proc google::search1 {server nick uhost chan argv} {
 	if {![channel get $chan google]} { return }
 
-	google::api_handler $chan $argv ${google::api_url}web 1
+	google::api_handler $server $chan $argv ${google::api_url}web 1
 }
 
 # News from API
 proc google::news {server nick uhost chan argv} {
 	if {![channel get $chan google]} { return }
 
-	google::api_handler $chan $argv ${google::api_url}news
+	google::api_handler $server $chan $argv ${google::api_url}news
 }
 
 # Images from API
 proc google::images {server nick uhost chan argv} {
 	if {![channel get $chan google]} { return }
 
-	google::api_handler $chan $argv ${google::api_url}images
+	google::api_handler $server $chan $argv ${google::api_url}images
 }
