@@ -73,11 +73,10 @@ static void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 	}
 
 	printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Running /tcl: '%s'", data);
-	if (tcl_command(data)) {
-		const char *res = tcl_str_result();
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result: %s", res);
+	if (tcl_command(data) == TCL_OK) {
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result: %s", tcl_str_result());
 	} else {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl command: %s", data);
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl command '%s': %s", data, tcl_str_error());
 	}
 }
 
@@ -106,17 +105,24 @@ void deinit_signals() {
  */
 void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal");
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
 	}
 }
 
 /*
  * Triggers on message sent by self, but not those sent by message own_public
  * (so that we can work with pub triggers that we trigger ourself)
+ * NOTE: This includes msgs to channels (type = 0), and nicks (type = 1)
  */
 void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
-	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, "", "", target, msg)) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal");
+	// public msg
+	if (type == 0) {
+		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, "", "", target, msg)) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
+		}
+	// private msg
+	} else {
+		// TODO emit msg to trigger on PM
 	}
 }
 
@@ -167,17 +173,16 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
-
-	// objv[0] has "putserv_raw"
 	char *server_tag = Tcl_GetString(objv[1]);
 	char *text = Tcl_GetString(objv[2]);
 	SERVER_REC *server = server_find_tag(server_tag);
+	if (server == NULL) {
+		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found", server_tag);
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
 
 	irc_send_cmd((IRC_SERVER_REC *) server, text);
-
-	// TODO need this; but must not listen for own
-	//signal_emit("server incoming", 2, server, text);
-
 	return TCL_OK;
 }
 
@@ -187,7 +192,7 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
  *
  * "raw" because putchan in Tcl will do some string fixing on text
  */
- int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 4) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putchan_raw server_tag channel text\"");
 		Tcl_SetObjResult(interp, str);
@@ -197,6 +202,12 @@ int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 	char *chan = Tcl_GetString(objv[2]);
 	char *text = Tcl_GetString(objv[3]);
 	SERVER_REC *server = server_find_tag(server_tag);
+	if (server == NULL) {
+		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found", server_tag);
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+
 	Tcl_Obj *send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", chan, text);
 
 	irc_send_cmd((IRC_SERVER_REC *) server, Tcl_GetString(send_str));
@@ -283,9 +294,7 @@ int interp_init() {
  * Execute command cmd in Tcl interp
  */
 int tcl_command(const char *cmd) {
-	if (Tcl_Eval(interp, cmd) == TCL_OK)
-		return -1;
-	return 1;
+	return Tcl_Eval(interp, cmd);
 }
 
 /*
