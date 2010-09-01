@@ -1,35 +1,48 @@
-#
-# Allow (some) eggdrop Tcl scripts to load with minor modifications
-#
-# Modifications for pub/pubm calls:
-#  1. remove hand function argument in bind proc
-#  2. add server argument as first function argument in bind proc
-#   e.g. proc someproc {nick uhost hand chan argv} { .. }
-#     -> proc someproc {server nick uhost chan argv} { .. }
-#  3. alter all putserv/puthelp calls to have $server as their first argument
-#   e.g. putserv "PRIVMSG $chan :Hello there"
-#     -> putserv $server "PRIVMSG $chan :Hello there"
-#   NOTE: putserv will not show output in Irssi. It is better to replace putserv
-#     with putchan $server $chan "$text" which will (if a public message...)
-#  4. possible gotcha of the above: any calls that are not in the procs that
-#     are bound directly which use putserv will require an added argument
-#   e.g. proc do_something {chan text} {
-#          putserv "PRIVMSG $chan :$text"
-#        }
-#     -> proc do_something {server chan text} {
-#          putserv $server "PRIVMSG $chan :text"
-#        }
-#
-#  The script ./utils/eggdrop_convert.tcl can be used for cases 1-3 (hopefully)
-#  But does not deal with putserv to putchan
-# TODO say re 2nd script
-#
-#  Change [channel get $channel value] to [channel_in_settings_str value $channel]
-#  to replace +enable'd values for channels with lists of channels via /set
-#
-#  Change setudef flag <value> to instead use settings_add_str "value" "" or some other /settings
-#  type
-#
-#  Change "bind type flag trigger function" e.g. "bind pub -|- !trigger function" to
-#  for instance, signal_add msg_pub trigger function
-#
+
+Eggdrop scripts can be converted to run in Irssi with some minor modifications.
+Look at the included scripts. Many of these also have eggdrop versions on my
+github in the eggdrop-scripts project.
+
+a. Modifications for bind functions (e.g. pub/pubm calls):
+  1. Remove hand function argument in bind proc
+
+  2. Add server argument as first function argument in bind proc
+    e.g. proc someproc {nick uhost hand chan argv} { .. }
+      -> proc someproc {server nick uhost chan argv} { .. }
+
+  3. Alter all putserv/puthelp calls to have $server as their first argument
+    e.g. putserv "PRIVMSG $chan :Hello there"
+      -> putserv $server "PRIVMSG $chan :Hello there"
+
+    NOTE: putserv will not show output in Irssi. It is better to replace putserv
+    with putchan $server $chan "$text" which will (if a public message...)
+
+  4. Possible gotcha of the above: any calls that are not in the procs that
+     are bound directly which use putserv will require an added argument
+     e.g. proc do_something {chan text} {
+         putserv "PRIVMSG $chan :$text"
+       }
+    -> proc do_something {server chan text} {
+         putserv $server "PRIVMSG $chan :text"
+       }
+
+The script ./utils/eggdrop_convert.tcl can be used for cases 1-3 (hopefully)
+But it does not deal with putserv to putchan. See the script for more info.
+
+The script ./utils/eggdrop_convert_putchan.tcl can be used to convert some
+cases of putserv to putchan. See the script for more info.
+ 
+b. Change [channel get $channel value] to
+   [channel_in_settings_str value $channel]
+   to replace +enable'd values for channels with lists of channels via /set
+
+c. Change 'setudef flag <value>' to instead use 'settings_add_str "value" ""' or
+   some other /settings type. Combine with b) to use.
+
+d. Change "bind type flag trigger function"
+   e.g. "bind pub -|- !trigger function" to, for instance,
+   "signal_add msg_pub trigger function"
+
+f. For non-blocking scripts you must use callback functions and use Tcl's
+   event support. For the http:: package, this means using the -command flag
+	 with http::geturl.
