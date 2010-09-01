@@ -58,44 +58,47 @@ proc ud::handler {server nick uhost chan argv} {
 		return
 	}
 
-	if {[catch {ud::fetch $query $number} result]} {
-		putchan $server $chan "Error: $result"
-		return
-	}
-
-	foreach line [ud::split_line $ud::line_length [dict get $result definition]] {
-		if {[incr output] > $ud::max_lines} {
-			if {$ud::show_truncate} {
-				putchan $server $chan "Output truncated. [ud::def_url $query $result]"
-			}
-			break
-		}
-		putchan $server $chan "$line"
-	}
+	ud::fetch $query $number $server $chan
 }
 
-proc ud::fetch {query number} {
+proc ud::fetch {query number server channel} {
 	http::config -useragent $ud::client
 	set page [expr {int(ceil($number / 7.0))}]
 	set number [expr {$number - (($page - 1) * 7)}]
 
 	set http_query [http::formatQuery term $query page $page]
 
-	set token [http::geturl $ud::url -timeout 20000 -query $http_query]
+	set token [http::geturl $ud::url -timeout 20000 -query $http_query -command "ud::output $server $channel $query $number"]
+}
+
+# Callback from HTTP get in ud::fetch
+proc ud::output {server channel query number token} {
 	set data [http::data $token]
 	set ncode [http::ncode $token]
 	http::cleanup $token
 
 	if {$ncode != 200} {
-		error "HTTP fetch error. Code: $ncode"
+		putchan $server $channel "HTTP fetch error. Code: $ncode"
+		return
 	}
 
 	set definitions [regexp -all -inline -- $ud::list_regexp $data]
 	if {[llength $definitions] < $number} {
-		error "[llength $definitions] definitions found."
+		putchan $server $channel "Error: [llength $definitions] definitions found."
+		return
 	}
 
-	return [ud::parse $query [lindex $definitions [expr {$number - 1}]]]
+	set result [ud::parse $query [lindex $definitions [expr {$number - 1}]]]
+
+	foreach line [ud::split_line $ud::line_length [dict get $result definition]] {
+		if {[incr output] > $ud::max_lines} {
+			if {$ud::show_truncate} {
+				putchan $server $channel "Output truncated. [ud::def_url $query $result]"
+			}
+			break
+		}
+		putchan $server $channel "$line"
+	}
 }
 
 proc ud::parse {query raw_definition} {
