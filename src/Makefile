@@ -15,16 +15,15 @@ DFLAGS=-DHAVE_CONFIG_H
 LINKS=-l$(TCL_LIB) -L$(LIB_DIR)
 INCLUDES=-I. $(TCL_INCLUDES) $(IRSSI_INCLUDES) $(GLIB2_INCLUDES)
 
-SRC=module.c
-OBJS=signals.o tcl_commands.o
+OBJS=signals.o tcl_commands.o module.o
 
 all: libtcl.so
 
-libtcl.so: module.c module.h $(OBJS)
-	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(SRC) $(DFLAGS) $(DEBUG)
+libtcl.so: $(OBJS)
+	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(DFLAGS) $(DEBUG)
 
 %.o: %.c %.h
-	$(CC) $(INCLUDES) $(CFLAGS) -c $(DFLAGS) -o $@ $<
+	$(CC) $(INCLUDES) $(CFLAGS) -c $(DFLAGS) -o $@ $< $(DEBUG)
 
 install: libtcl.so
 	mkdir -p $(HOME)/.irssi/modules
