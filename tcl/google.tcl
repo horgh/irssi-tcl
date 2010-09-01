@@ -39,12 +39,12 @@ namespace eval google {
 
 	variable api_referer "http://www.egghelp.org"
 
-	bind pub	-|- "!g" google::search
-	bind pub	-|- "!google" google::search
-	bind pub	-|- "!g1" google::search1
-	bind pub	-|- "!news" google::news
-	bind pub	-|- "!images" google::images
-	bind pub	-|- "!convert" google::convert
+	signal_add msg_pub "!g" google::search
+	signal_add msg_pub "!google" google::search
+	signal_add msg_pub "!g1" google::search1
+	signal_add msg_pub "!news" google::news
+	signal_add msg_pub "!images" google::images
+	signal_add msg_pub "!convert" google::convert
 
 	settings_add_str "google_enabled_channels" ""
 }
@@ -83,7 +83,7 @@ proc google::convert_parse {html} {
 
 # Query normal html for conversions
 proc google::convert {server nick uhost chan argv} {
-	if {![channel get $chan google]} { return }
+	if {![channel_in_settings_str google_enabled_channels $chan]} { return }
 
 	if {[string length $argv] == 0} {
 		putchan $server $chan "Please provide a query."

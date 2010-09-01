@@ -71,9 +71,7 @@ proc load_script {script} {
 	source [irssi_dir]${::SCRIPT_PATH}/${script}
 }
 
-#load_script repeat.tcl
 load_script urltitle.tcl
-load_script egg_compat.tcl
 load_script google.tcl
 load_script calc.tcl
 load_script slang.tcl
