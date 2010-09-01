@@ -59,7 +59,7 @@ proc signal_add {type keyword proc_name} {
 
 # return 1 if channel is in setting key string (list) $key, 0 otherwise
 proc channel_in_settings_str {key channel} {
-	set channel_str [settings_get $key]
+	set channel_str [settings_get_str $key]
 	set channels [split $channel_str]
 	if {[lsearch -exact -nocase $channels $channel] > -1} {
 		return 1

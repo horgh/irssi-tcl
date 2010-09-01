@@ -12,7 +12,7 @@
  */
 int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 1) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw server_tag text\"");
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_dir\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -92,11 +92,11 @@ int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 }
 
 /*
- * settings_get Tcl command to get Irssi settings
+ * settings_get_str Tcl command to get Irssi settings
  */
-int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+int settings_get_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 2) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_get settings_key\"");
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_get_str settings_key\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -115,8 +115,6 @@ int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
 /*
  * Add string setting from Tcl
- *
- * named this way as conflicts with macro...
  */
 int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
 	if (objc != 3) {

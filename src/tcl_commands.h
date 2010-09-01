@@ -2,7 +2,7 @@ int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 int putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int settings_get(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int settings_get_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
 typedef struct {
@@ -14,7 +14,7 @@ static const TclCmd TclCmdTable[] = {
 	{"putserv_raw", putserv_raw},
 	{"putchan_raw", putchan_raw},
 	{"irssi_print", irssi_print},
-	{"settings_get", settings_get},
+	{"settings_get_str", settings_get_str_tcl},
 	{"settings_add_str", settings_add_str_tcl},
 	{"irssi_dir", irssi_dir},
 	{NULL, NULL}
