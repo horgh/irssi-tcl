@@ -168,7 +168,7 @@ void tcl_init(void) {
 	tcl_register_commands();
 
 	if(tcl_reload_scripts() != TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s", tcl_str_error());
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s (irssi.tcl not found?)", tcl_str_error());
 	}
 
 	init_commands();
