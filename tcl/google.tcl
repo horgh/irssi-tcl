@@ -26,7 +26,6 @@ package require json
 package require htmlparse
 
 namespace eval google {
-	#variable output_cmd "cd::putnow"
 	variable output_cmd "putserv"
 
 	# Not enforced for API queries
@@ -49,11 +48,21 @@ namespace eval google {
 	settings_add_str "google_enabled_channels" ""
 }
 
-proc google::convert_fetch {terms} {
-	http::config -useragent $google::useragent
+# Query normal html for conversions
+proc google::convert {server nick uhost chan argv} {
+	if {![channel_in_settings_str google_enabled_channels $chan]} { return }
 
-	set query [http::formatQuery q $terms]
-	set token [http::geturl ${google::convert_url}?${query}]
+	if {[string length $argv] == 0} {
+		putchan $server $chan "Please provide a query."
+		return
+	}
+
+	http::config -useragent $google::useragent
+	set query [http::formatQuery q $argv]
+	set token [http::geturl ${google::convert_url}?${query} -command "google::convert_callback $server $chan"]
+}
+
+proc google::convert_callback {server chan token} {
 	set data [http::data $token]
 	set ncode [http::ncode $token]
 	http::cleanup $token
@@ -64,10 +73,16 @@ proc google::convert_fetch {terms} {
 	#close $fid
 
 	if {$ncode != 200} {
-		error "HTTP query failed: $ncode"
+		putchan $server $chan "HTTP query failed: $ncode"
+		return
 	}
 
-	return $data
+	if {[catch {google::convert_parse $data} result]} {
+		putchan $server $chan "Error: $result."
+		return
+	}
+
+	putchan $server $chan "\002$result"
 }
 
 proc google::convert_parse {html} {
@@ -81,28 +96,6 @@ proc google::convert_parse {html} {
 	return [regsub -all -- {<.*?>} $result ""]
 }
 
-# Query normal html for conversions
-proc google::convert {server nick uhost chan argv} {
-	if {![channel_in_settings_str google_enabled_channels $chan]} { return }
-
-	if {[string length $argv] == 0} {
-		putchan $server $chan "Please provide a query."
-		return
-	}
-
-	if {[catch {google::convert_fetch $argv} data]} {
-		putchan $server $chan "Error fetching results: $data."
-		return
-	}
-
-	if {[catch {google::convert_parse $data} result]} {
-		putchan $server $chan "Error: $result."
-		return
-	}
-
-	putchan $server $chan "\002$result\002"
-}
-
 # Output for results from api query
 proc google::output {server chan url title content} {
 	regsub -all -- {(?:<b>|</b>)} $title "\002" title
@@ -111,12 +104,22 @@ proc google::output {server chan url title content} {
 	putchan $server $chan "[htmlparse::mapEscapes $output]"
 }
 
-# Return results from API query of $url
-proc google::api_fetch {terms url} {
-	set query [http::formatQuery v "1.0" q $terms safe off]
+# Query api
+proc google::api_handler {server chan argv url {num {}}} {
+	if {[string length $argv] == 0} {
+		putchan $server $chan "Error: Please supply search terms."
+		return
+	}
+	set query [http::formatQuery v "1.0" q $argv safe off]
 	set headers [list Referer $google::api_referer]
+	if {$num == ""} {
+		set num 4
+	}
 
-	set token [http::geturl ${url}?${query} -headers $headers -method GET]
+	set token [http::geturl ${url}?${query} -headers $headers -method GET -command "google::api_callback $server $chan $num"]
+}
+
+proc google::api_callback {server chan num token} {
 	set data [http::data $token]
 	set ncode [http::ncode $token]
 	http::cleanup $token
@@ -128,36 +131,16 @@ proc google::api_fetch {terms url} {
 	#close $fid
 
 	if {$ncode != 200} {
-		error "HTTP query failed: $ncode"
+		putchan $server $chan "HTTP query failed: $ncode"
+		return
 	}
 
-	return [json::json2dict $data]
-}
-
-# Validate input and then return list of results
-proc google::api_validate {argv url} {
-	if {[string length $argv] == 0} {
-		error "Please supply search terms."
-	}
-
-	if {[catch {google::api_fetch $argv $url} data]} {
-		error "Error fetching results: $data."
-	}
-
+	set data [json::json2dict $data]
 	set response [dict get $data responseData]
 	set results [dict get $response results]
 
 	if {[llength $results] == 0} {
-		error "No results."
-	}
-
-	return $results
-}
-
-# Query api
-proc google::api_handler {server chan argv url {num {}}} {
-	if {[catch {google::api_validate $argv $url} results]} {
-		putchan $server $chan "$results"
+		putchan $server $chan "No results."
 		return
 	}
 
