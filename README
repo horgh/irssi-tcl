@@ -40,6 +40,10 @@ To load the module:
 To autoload the module:
 echo "load tcl" >> ~/.irssi/startup
 
+The scripts that are loaded automatically are placed in ~/.irssi/tcl/scripts.conf
+Alternatively, a script in ~/.irssi/tcl/ can be loaded via
+/tcl load_script name_of_script.tcl
+
 5. Commands
 
 Run a command in the Tcl interpreter:
@@ -62,13 +66,8 @@ See the "tcl" section in /set for Tcl script settings.
 
 7. Scripting
 
-Additional commands available to the Tcl interpreter can be seen in the
-TclCmdTable table in tcl_module.c, as well as in tcl/irssi.tcl
+See scripting.txt
 
-Notes on some commands:
-- putchan & putserv are wrappers around putchan_raw/putserv_raw. They do some
-  cleaning on strings sent such as removing newlines and tabs. If you don't need
-  this cleanup, feel free to use the _raw versions
-- putserv is similar to putchan except putchan will show in the Irssi UI (for
-  public channels) the commands being sent to the server. putserv will not
-  trigger any signals whereas putchan triggers the signal message pub_own
+8. Using (edited) eggdrop scripts
+
+See eggdrop_scripts.txt

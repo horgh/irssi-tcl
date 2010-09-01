@@ -1,0 +1,10 @@
+Additional commands available to the Tcl interpreter can be seen in the
+TclCmdTable table in tcl_module.c, as well as in tcl/irssi.tcl
+
+Notes on some commands:
+- putchan & putserv are wrappers around putchan_raw/putserv_raw. They do some
+  cleaning on strings sent such as removing newlines and tabs. If you don't need
+  this cleanup, feel free to use the _raw versions
+- putserv is similar to putchan except putchan will show in the Irssi UI (for
+  public channels) the commands being sent to the server. putserv will not
+  trigger any signals whereas putchan triggers the signal message pub_own

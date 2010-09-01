@@ -1,5 +1,5 @@
 #
-# Irssi Tcl interpreter util script
+# core Irssi Tcl script
 #
 
 # SCRIPT_PATH is relative to ~/.irssi
@@ -44,9 +44,9 @@ proc emit_msg_pub {server nick uhost target msg} {
 		if {[string match -nocase $bind_keyword $keyword]} {
 			# We want to include first word if capturing all
 			if {$bind_keyword == "*"} {
-				{*}$bind_proc $server $nick $uhost $target $msg
+				$bind_proc $server $nick $uhost $target $msg
 			} else {
-				{*}$bind_proc $server $nick $uhost $target $rest
+				$bind_proc $server $nick $uhost $target $rest
 			}
 		}
 	}
@@ -71,7 +71,4 @@ proc load_script {script} {
 	source [irssi_dir]${::SCRIPT_PATH}/${script}
 }
 
-load_script urltitle.tcl
-load_script google.tcl
-load_script calc.tcl
-load_script slang.tcl
+load_script scripts.conf
