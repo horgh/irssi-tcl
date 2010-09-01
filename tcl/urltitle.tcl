@@ -62,6 +62,7 @@ proc urltitle::http_done {server target token} {
 		urltitle::geturl [dict get $meta Location] $server $target
 	} else {
 		set title [extract_title $data]
+		set title [encoding convertfrom identity $title]
 		if {$title != ""} {
 			putchan $server $target "\002[string trim $title]"
 		}
