@@ -21,7 +21,7 @@ OBJS=signals.o tcl_commands.o
 all: libtcl.so
 
 libtcl.so: module.c module.h $(OBJS)
-	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(SRC) $(DFLAGS)
+	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(SRC) $(DFLAGS) $(DEBUG)
 
 %.o: %.c %.h
 	$(CC) $(INCLUDES) $(CFLAGS) -c $(DFLAGS) -o $@ $<

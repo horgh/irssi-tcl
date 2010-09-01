@@ -10,10 +10,6 @@ have I tested with higher than 8.5.* actually.
 
 2. Building
 
-You should check that I remembered to comment out #include "debug.h". If this
-is included, the module will search for scripts in a directory that you won't
-have.
-
 Linux:
 Run 'make'
 
@@ -24,6 +20,9 @@ Didn't work? If it fails, check the -I directories listed in the Makefile
 actually exist. They may be at a different location on your system (such as in
 /usr/local/include and /usr/local/lib). You will need to alter them until they
 are all correct if they are not.
+
+Building with debug (only really alters script/module paths right now):
+make -e DEBUG=-DDEBUG
 
 3. Installing
 

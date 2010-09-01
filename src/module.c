@@ -9,7 +9,9 @@
 #include "signals.h"
 #include "tcl_commands.h"
 
+#ifdef DEBUG
 #include "debug.h"
+#endif
 
 static Tcl_Interp *interp;
 
