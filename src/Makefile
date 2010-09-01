@@ -30,7 +30,7 @@ install: libtcl.so
 	mkdir -p $(HOME)/.irssi/modules
 	cp libtcl.so $(HOME)/.irssi/modules
 	mkdir -p $(HOME)/.irssi/tcl
-	cp ./tcl/* $(HOME)/.irssi/tcl
+	cp ../scripts/* $(HOME)/.irssi/tcl
 
 clean:
 	rm -f libtcl.so $(OBJS)
