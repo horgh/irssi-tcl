@@ -1,3 +1,7 @@
+/*
+ * Capture signals sent by Irssi and send them to Tcl
+ */
+
 #include <tcl.h>
 #include "irssi_includes.h"
 #include "signals.h"

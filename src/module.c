@@ -1,6 +1,9 @@
 /*
  * 2010-08-26
  * by Will Storey
+ *
+ * Set up the Tcl interpreter and Irssi module
+ * Also provide Irssi commands
  */
 
 #include <tcl.h>
