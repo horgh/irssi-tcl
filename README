@@ -4,6 +4,7 @@ To build/use the module you need:
 - Irssi and Irssi development files
 - glib2 and glib2 development files
 - Tcl 8.5+ and Tcl 8.5+ development files
+- GNU Make (gmake)
 
 It's possible it will work with older Tcl versions, but I haven't tested. Nor
 have I tested with higher than 8.5.* actually.
@@ -14,7 +15,7 @@ Linux:
 Run 'make'
 
 FreeBSD:
-Run 'make -f Makefile.FreeBSD'
+Run 'gmake -f Makefile.FreeBSD'
 
 Didn't work? If it fails, check the -I directories listed in the Makefile
 actually exist. They may be at a different location on your system (such as in
