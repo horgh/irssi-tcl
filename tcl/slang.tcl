@@ -68,7 +68,7 @@ proc ud::fetch {query number server channel} {
 
 	set http_query [http::formatQuery term $query page $page]
 
-	set token [http::geturl $ud::url -timeout 20000 -query $http_query -command "ud::output $server $channel $query $number"]
+	set token [http::geturl $ud::url -timeout 20000 -query $http_query -command "ud::output $server $channel [list $query] $number"]
 }
 
 # Callback from HTTP get in ud::fetch
