@@ -26,8 +26,6 @@ package require json
 package require htmlparse
 
 namespace eval google {
-	variable output_cmd "putserv"
-
 	# Not enforced for API queries
 	variable useragent "Lynx/2.8.8dev.2 libwww-FM/2.14 SSL-MM/1.4.1"
 
@@ -82,7 +80,7 @@ proc google::convert_callback {server chan token} {
 		return
 	}
 
-	putchan $server $chan "\002$result"
+	putchan $server $chan "\002$result\002"
 }
 
 proc google::convert_parse {html} {
