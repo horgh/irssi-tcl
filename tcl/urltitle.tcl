@@ -25,22 +25,29 @@ proc urltitle::urltitle {server nick uhost target msg} {
 	if {![channel_in_settings_str urltitle_enabled_channels $target]} {
 		return
 	}
-	set url []
-	if {[regexp -nocase -- {https?://(\S+)} $msg -> url]} {
-		set url [idna::domain_toascii $url]
+	set full_url []
+	if {[regexp -nocase -- {(https?://\S+)} $msg -> url]} {
+		set full_url $url
 	} elseif {[regexp -nocase -- {(www\.\S+)} $msg -> url]} {
-		set url [idna::domain_toascii $url]
+		set full_url "http://${url}"
 	}
 
-	# from http-title.tcl by Pixelz. Avoids urls that will be treated as
-	# a flag
-	if {[string index $url 0] eq "-"} {
+	if {$full_url == ""} {
 		return
 	}
 
-	if {$url != ""} {
-		urltitle::geturl "http://${url}" $server $target
+	if {![regexp -- {(https?://)([^/]*)(.*)} $full_url -> prefix domain rest]} {
+		error "urltitle parse problem: $full_url"
 	}
+	set domain [idna::domain_toascii $domain]
+
+	# from http-title.tcl by Pixelz. Avoids urls that will be treated as
+	# a flag
+	if {[string index $domain 0] eq "-"} {
+		return
+	}
+
+	urltitle::geturl "${prefix}${domain}${rest}" $server $target
 }
 
 proc urltitle::extract_title {data} {
