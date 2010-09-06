@@ -8,6 +8,7 @@
 package require http
 package require tls
 package require htmlparse
+package require idna
 
 namespace eval urltitle {
 	variable useragent "Lynx/2.8.7rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/0.9.8n"
@@ -24,9 +25,20 @@ proc urltitle::urltitle {server nick uhost target msg} {
 	if {![channel_in_settings_str urltitle_enabled_channels $target]} {
 		return
 	}
-	if {[regexp -nocase -- {(https?://\S+)} $msg -> url]} {
-		urltitle::geturl $url $server $target
+	set url []
+	if {[regexp -nocase -- {https?://(\S+)} $msg -> url]} {
+		set url [idna::domain_toascii $url]
 	} elseif {[regexp -nocase -- {(www\.\S+)} $msg -> url]} {
+		set url [idna::domain_toascii $url]
+	}
+
+	# from http-title.tcl by Pixelz. Avoids urls that will be treated as
+	# a flag
+	if {[string index $url 0] eq "-"} {
+		return
+	}
+
+	if {$url != ""} {
 		urltitle::geturl "http://${url}" $server $target
 	}
 }
