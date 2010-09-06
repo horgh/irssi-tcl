@@ -36,10 +36,11 @@ proc urltitle::urltitle {server nick uhost target msg} {
 		return
 	}
 
-	if {![regexp -- {(https?://)([^/]*)(.*)} $full_url -> prefix domain rest]} {
+	if {![regexp -- {(https?://)([^/]*)/?(.*)} $full_url -> prefix domain rest]} {
 		error "urltitle parse problem: $full_url"
 	}
 	set domain [idna::domain_toascii $domain]
+	set rest [http::formatQuery $rest]
 
 	# from http-title.tcl by Pixelz. Avoids urls that will be treated as
 	# a flag
@@ -47,7 +48,8 @@ proc urltitle::urltitle {server nick uhost target msg} {
 		return
 	}
 
-	urltitle::geturl "${prefix}${domain}${rest}" $server $target
+	set url "${prefix}${domain}/${rest}"
+	urltitle::geturl $url $server $target
 }
 
 proc urltitle::extract_title {data} {
