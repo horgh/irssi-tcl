@@ -40,7 +40,7 @@ proc urltitle::urltitle {server nick uhost target msg} {
 		error "urltitle parse problem: $full_url"
 	}
 	set domain [idna::domain_toascii $domain]
-	set rest [http::formatQuery $rest]
+	#set rest [http::formatQuery $rest]
 
 	# from http-title.tcl by Pixelz. Avoids urls that will be treated as
 	# a flag
