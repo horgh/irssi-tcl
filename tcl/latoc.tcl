@@ -28,21 +28,23 @@ namespace eval latoc {
 	settings_add_str "latoc_enabled_channels" ""
 }
 
-proc latoc::url_handler {server nick uhost chan argv} {
-	putchan $server $chan "$latoc::commodities_url"
-}
-
 # fetch lines from given commodity type (url) and only return lines that
 # match the given pattern (regexp) to Name (optional)
 # return list of lines, each a stock
-proc latoc::fetch {type {pattern {}}} {
-	set token [http::geturl ${latoc::commodities_url}${type} -timeout 60000]
+proc latoc::fetch {type pattern server chan} {
+	http::config -useragent $latoc::user_agent
+	set token [http::geturl ${latoc::commodities_url}${type} -timeout 60000 -command "latoc::output $pattern $server $chan"]
+}
+
+# Callback from http::geturl
+proc latoc::output {pattern server chan token} {
 	set data [http::data $token]
 	set ncode [http::ncode $token]
 	http::cleanup $token
 
 	if {$ncode != 200} {
-		error "HTTP error: (code: $ncode): $data"
+		putchan $server $chan "HTTP error: (code: $ncode): $data"
+		return
 	}
 
 	set lines []
@@ -59,7 +61,15 @@ proc latoc::fetch {type {pattern {}}} {
 	if {[llength $lines] == 0} {
 		lappend lines "No results."
 	}
-	return $lines
+
+	foreach line $lines {
+		putchan $server $chan "$line"
+	}
+}
+
+proc latoc::url_handler {server nick uhost chan argv} {
+	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
+	putchan $server $chan "$latoc::commodities_url"
 }
 
 proc latoc::commodity_handler {server nick uhost chan argv} {
@@ -69,53 +79,25 @@ proc latoc::commodity_handler {server nick uhost chan argv} {
 		return
 	}
 
-	if {[catch {latoc::fetch $argv} result]} {
-		putchan $server $chan "Error: $result"
-		return
-	}
-
-	foreach line $result {
-		putchan $server $chan "$line"
-	}
+	latoc::fetch $argv "." $server $chan
 }
 
 proc latoc::oil_handler {server nick uhost chan argv} {
 	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
 
-	if {[catch {latoc::fetch "energy" "Crude Oil"} result]} {
-		putchan $server $chan "Error: $result"
-		return
-	}
-
-	foreach line $result {
-		putchan $server $chan "$line"
-	}
+	latoc::fetch "energy" "Crude Oil" $server $chan
 }
 
 proc latoc::gold_handler {server nick uhost chan argv} {
 	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
 
-	if {[catch {latoc::fetch "metals" "Gold"} result]} {
-		putchan $server $chan "Error: $result"
-		return
-	}
-
-	foreach line $result {
-		putchan $server $chan "$line"
-	}
+	latoc::fetch "metals" "Gold" $server $chan
 }
 
 proc latoc::silver_handler {server nick uhost chan argv} {
 	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
 
-	if {[catch {latoc::fetch "metals" "Silver"} result]} {
-		putchan $server $chan "Error: $result"
-		return
-	}
-
-	foreach line $result {
-		putchan $server $chan "$line"
-	}
+	latoc::fetch "metals" "Silver" $server $chan
 }
 
 proc latoc::format {name price last direction change percent} {
