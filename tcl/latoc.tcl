@@ -33,7 +33,7 @@ namespace eval latoc {
 # return list of lines, each a stock
 proc latoc::fetch {type pattern server chan} {
 	http::config -useragent $latoc::user_agent
-	set token [http::geturl ${latoc::commodities_url}${type} -timeout 60000 -command "latoc::output $pattern $server $chan"]
+	set token [http::geturl ${latoc::commodities_url}${type} -timeout 20000 -command "latoc::output [list $pattern] $server $chan"]
 }
 
 # Callback from http::geturl
