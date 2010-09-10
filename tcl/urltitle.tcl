@@ -11,7 +11,8 @@ package require htmlparse
 package require idna
 
 namespace eval urltitle {
-	variable useragent "Lynx/2.8.7rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/0.9.8n"
+	#variable useragent "Lynx/2.8.7rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/0.9.8n"
+	variable useragent "Tcl http client package 2.7.5"
 	variable max_bytes 32768
 
 	settings_add_str "urltitle_enabled_channels" ""
@@ -61,13 +62,13 @@ proc urltitle::extract_title {data} {
 
 proc urltitle::geturl {url server target} {
 	http::config -useragent $urltitle::useragent
-	set token [http::geturl $url -blocksize $urltitle::max_bytes \
+	set token [http::geturl $url -blocksize $urltitle::max_bytes -timeout 10000 \
 		-progress urltitle::http_progress -command "urltitle::http_done $server $target"]
 }
 
 # stop after max_bytes
 proc urltitle::http_progress {token total current} {
-	if {$current >= 32768} {
+	if {$current >= $urltitle::max_bytes} {
 		http::reset $token
 	}
 }
