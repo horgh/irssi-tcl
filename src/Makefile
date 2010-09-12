@@ -29,7 +29,11 @@ install: libtcl.so
 	mkdir -p $(HOME)/.irssi/modules
 	cp libtcl.so $(HOME)/.irssi/modules
 	mkdir -p $(HOME)/.irssi/tcl
-	cp ../tcl/* $(HOME)/.irssi/tcl
+	cp ../tcl/*.tcl $(HOME)/.irssi/tcl
+	if test -e $(HOME)/.irssi/tcl/scripts.conf; \
+	then echo "Not replacing existing scripts.conf"; \
+	else cp ../tcl/scripts.conf $(HOME)/.irssi/tcl; \
+	fi
 
 clean:
 	rm -f libtcl.so $(OBJS)
