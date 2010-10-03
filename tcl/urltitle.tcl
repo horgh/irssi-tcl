@@ -79,11 +79,7 @@ proc urltitle::http_done {server target token} {
 	set code [http::ncode $token]
 	set meta [http::meta $token]
 	upvar #0 $token state
-	if {[info exists state(charset)]} {
-		set charset $state(charset)
-	} else {
-		set charset iso8859-1
-	}
+	set charset [urltitle::get_charset $state(charset)]
 	http::cleanup $token
 
 	# Follow redirects for some 30* codes
@@ -96,6 +92,18 @@ proc urltitle::http_done {server target token} {
 			putchan $server $target "\002[string trim $title]"
 		}
 	}
+}
+
+proc urltitle::get_charset {charset} {
+	if {[info exists state(charset)]} {
+		set charset $state(charset)
+	} else {
+		set charset iso8859-1
+	}
+	# needed as some charsets from state(charset) are invalid mapping
+	# to tcl charsets. e.g. iso-8859-1 must be changed to iso-8859-1
+	regsub -- {iso-} $charset iso
+	return $charset
 }
 
 irssi_print "urltitle.tcl loaded"
