@@ -78,14 +78,20 @@ proc urltitle::http_done {server target token} {
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
+	upvar #0 $token state
+	if {[info exists state(charset)]} {
+		set charset $state(charset)
+	} else {
+		set charset iso8859-1
+	}
 	http::cleanup $token
 
 	# Follow redirects for some 30* codes
 	if {[regexp -- {30[01237]} $code]} {
 		urltitle::geturl [dict get $meta Location] $server $target
 	} else {
+		set data [encoding convertfrom $charset $data]
 		set title [extract_title $data]
-		set title [encoding convertfrom identity $title]
 		if {$title != ""} {
 			putchan $server $target "\002[string trim $title]"
 		}
