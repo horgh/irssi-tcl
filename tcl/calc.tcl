@@ -19,9 +19,13 @@ proc calc::safe_calc {server nick uhost chan str} {
 		return
 	}
 
+	# treat ^ as exponentiation
+	regsub -all -- {\^} $str "**" str
+
 	foreach char [split $str {}] {
-		if {![is_op $char] && ![string is integer $char]} {
-			putchan $server $chan "$nick: Invalid expression for calc."
+		# allow characters so as to be able to call mathfuncs
+		if {![is_op $char] && ![regexp -- {^[a-z0-9]$} $char]} {
+			putchan $server $chan "${nick}: Invalid expression. (${str})"
 			return
 		}
 	}
@@ -31,7 +35,7 @@ proc calc::safe_calc {server nick uhost chan str} {
 	set str [subst $str]
 
 	if {[catch {expr $str} out]} {
-		putchan $server $chan "$nick: Invalid equation."
+		putchan $server $chan "${nick}: Invalid equation. (${str})"
 		return
 	} else {
 		putchan $server $chan "$str = $out"

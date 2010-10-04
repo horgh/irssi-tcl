@@ -58,7 +58,7 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
 	// public msg
 	if (type == 0) {
-		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, "", "", target, msg)) {
+		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, server->nick, "", target, msg)) {
 			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
 		}
 	// private msg
