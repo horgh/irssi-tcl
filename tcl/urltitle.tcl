@@ -78,8 +78,7 @@ proc urltitle::http_done {server target token} {
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
-	upvar #0 $token state
-	set charset [urltitle::get_charset $state(charset)]
+	set charset [urltitle::get_charset $token]
 	http::cleanup $token
 
 	# Follow redirects for some 30* codes
@@ -94,7 +93,8 @@ proc urltitle::http_done {server target token} {
 	}
 }
 
-proc urltitle::get_charset {charset} {
+proc urltitle::get_charset {token} {
+	upvar #0 $token state
 	if {[info exists state(charset)]} {
 		set charset $state(charset)
 	} else {
