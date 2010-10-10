@@ -33,7 +33,7 @@ The script ./utils/eggdrop_convert_putchan.tcl can be used to convert some
 cases of putserv to putchan. See the script for more info.
  
 b. Change [channel get $channel value] to
-   [channel_in_settings_str value $channel]
+   [str_in_settings_str value $channel]
    to replace +enable'd values for channels with lists of channels via /set
 
 c. Change 'setudef flag <value>' to instead use 'settings_add_str "value" ""' or

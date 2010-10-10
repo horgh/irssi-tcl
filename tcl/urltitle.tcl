@@ -2,7 +2,10 @@
 # Fetch title of URLs in channels
 #
 # /set urltitle_enabled_channels #channel1 #channel2 ..
-# to enable
+# to enable in those channels
+#
+# /set urltitle_ignored_nicks nick1 nick2 nick2 ..
+# to not fetch titles of urls by these nicks
 #
 
 package require http
@@ -16,6 +19,7 @@ namespace eval urltitle {
 	variable max_bytes 32768
 
 	settings_add_str "urltitle_enabled_channels" ""
+	settings_add_str "urltitle_ignored_nicks" ""
 
 	signal_add msg_pub "*" urltitle::urltitle
 
@@ -23,9 +27,14 @@ namespace eval urltitle {
 }
 
 proc urltitle::urltitle {server nick uhost target msg} {
-	if {![channel_in_settings_str urltitle_enabled_channels $target]} {
+	if {![str_in_settings_str urltitle_enabled_channels $target]} {
 		return
 	}
+
+	if {[str_in_settings_str urltitle_ignored_nicks $nick]} {
+		return
+	}
+
 	set full_url []
 	if {[regexp -nocase -- {(https?://\S+)} $msg -> url]} {
 		set full_url $url

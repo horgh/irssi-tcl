@@ -57,11 +57,11 @@ proc signal_add {type keyword proc_name} {
 	lappend ::signals($type) [list $keyword $proc_name]
 }
 
-# return 1 if channel is in setting key string (list) $key, 0 otherwise
-proc channel_in_settings_str {key channel} {
-	set channel_str [settings_get_str $key]
-	set channels [split $channel_str]
-	if {[lsearch -exact -nocase $channels $channel] > -1} {
+# return 1 if str is in setting key string (list) $key, 0 otherwise
+proc str_in_settings_str {key str} {
+	set setting_str [settings_get_str $key]
+	set strs [split $setting_str]
+	if {[lsearch -exact -nocase $strs $str] > -1} {
 		return 1
 	}
 	return 0

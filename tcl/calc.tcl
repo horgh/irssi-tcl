@@ -15,7 +15,7 @@ proc calc::is_op {str} {
 }
 
 proc calc::safe_calc {server nick uhost chan str} {
-	if {![channel_in_settings_str "calc_enabled_channels" $chan]} {
+	if {![str_in_settings_str "calc_enabled_channels" $chan]} {
 		return
 	}
 

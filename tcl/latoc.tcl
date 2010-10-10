@@ -68,12 +68,12 @@ proc latoc::output {pattern server chan token} {
 }
 
 proc latoc::url_handler {server nick uhost chan argv} {
-	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
+	if {![str_in_settings_str "latoc_enabled_channels" $chan]} { return }
 	putchan $server $chan "$latoc::commodities_url"
 }
 
 proc latoc::commodity_handler {server nick uhost chan argv} {
-	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
+	if {![str_in_settings_str "latoc_enabled_channels" $chan]} { return }
 	if {[lsearch $latoc::commodities $argv] == -1} {
 		putchan $server $chan "Valid commodities are: $latoc::commodities"
 		return
@@ -83,19 +83,19 @@ proc latoc::commodity_handler {server nick uhost chan argv} {
 }
 
 proc latoc::oil_handler {server nick uhost chan argv} {
-	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
+	if {![str_in_settings_str "latoc_enabled_channels" $chan]} { return }
 
 	latoc::fetch "energy" "Crude Oil" $server $chan
 }
 
 proc latoc::gold_handler {server nick uhost chan argv} {
-	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
+	if {![str_in_settings_str "latoc_enabled_channels" $chan]} { return }
 
 	latoc::fetch "metals" "Gold" $server $chan
 }
 
 proc latoc::silver_handler {server nick uhost chan argv} {
-	if {![channel_in_settings_str "latoc_enabled_channels" $chan]} { return }
+	if {![str_in_settings_str "latoc_enabled_channels" $chan]} { return }
 
 	latoc::fetch "metals" "Silver" $server $chan
 }

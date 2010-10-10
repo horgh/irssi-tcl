@@ -50,6 +50,6 @@ c. Irssi settings
   settings_add_str <key> <default>
     Add a key to Irssi settings for a string value with given default
 
-  channel_in_settings_str <key> <channel>
-    Returns true if channel is in the settings string for key. Key value is
-    assumed to be a list of channels separated by spaces.
+  str_in_settings_str <key> <str>
+    Returns true if str is in the settings string for key. Key value is
+    assumed to be a list of strings separated by spaces.

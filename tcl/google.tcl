@@ -48,7 +48,7 @@ namespace eval google {
 
 # Query normal html for conversions
 proc google::convert {server nick uhost chan argv} {
-	if {![channel_in_settings_str google_enabled_channels $chan]} { return }
+	if {![str_in_settings_str google_enabled_channels $chan]} { return }
 
 	if {[string length $argv] == 0} {
 		putchan $server $chan "Please provide a query."
@@ -157,7 +157,7 @@ proc google::api_callback {server chan num token} {
 
 # Regular API search
 proc google::search {server nick uhost chan argv} {
-	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+	if {![str_in_settings_str "google_enabled_channels" $chan]} {
 		return
 	}
 
@@ -166,7 +166,7 @@ proc google::search {server nick uhost chan argv} {
 
 # Regular API search, 1 result
 proc google::search1 {server nick uhost chan argv} {
-	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+	if {![str_in_settings_str "google_enabled_channels" $chan]} {
 		return
 	}
 
@@ -175,7 +175,7 @@ proc google::search1 {server nick uhost chan argv} {
 
 # News from API
 proc google::news {server nick uhost chan argv} {
-	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+	if {![str_in_settings_str "google_enabled_channels" $chan]} {
 		return
 	}
 
@@ -184,7 +184,7 @@ proc google::news {server nick uhost chan argv} {
 
 # Images from API
 proc google::images {server nick uhost chan argv} {
-	if {![channel_in_settings_str "google_enabled_channels" $chan]} {
+	if {![str_in_settings_str "google_enabled_channels" $chan]} {
 		return
 	}
 
