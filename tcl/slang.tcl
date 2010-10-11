@@ -40,7 +40,7 @@ namespace eval ud {
 }
 
 proc ud::handler {server nick uhost chan argv} {
-	if {![channel_in_settings_str "slang_enabled_channels" $chan]} {
+	if {![str_in_settings_str "slang_enabled_channels" $chan]} {
 		return
 	}
 
