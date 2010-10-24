@@ -110,8 +110,12 @@ proc urltitle::get_charset {token} {
 		set charset iso8859-1
 	}
 	# needed as some charsets from state(charset) are invalid mapping
-	# to tcl charsets. e.g. iso-8859-1 must be changed to iso-8859-1
+	# to tcl charsets.
+
+	# iso-8859-1 must be changed to iso8859-1
 	regsub -- {iso-} $charset iso charset
+	# shift_jis -> shiftjis
+	regsub -- {shift_} $charset shift charset
 	return $charset
 }
 
