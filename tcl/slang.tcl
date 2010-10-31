@@ -30,7 +30,7 @@ namespace eval ud {
 	variable client "Mozilla/5.0 (compatible; Y!J; for robot study; keyoshid)"
 	variable url http://www.urbandictionary.com/define.php
 	variable list_regexp {<td class='text'.*? id='entry_.*?'>.*?</td>}
-	variable def_regexp {id='entry_(.*?)'>.*?<div class='definition'>(.*?)</div>}
+	variable def_regexp {id='entry_(.*?)'>.*?<div class="definition">(.*?)</div>}
 
 	settings_add_str "slang_enabled_channels" ""
 	signal_add msg_pub $ud::trigger ud::handler
