@@ -71,4 +71,8 @@ proc load_script {script} {
 	source [irssi_dir]${::SCRIPT_PATH}/${script}
 }
 
+proc load_script_absolute {script} {
+	source $script
+}
+
 load_script scripts.conf
