@@ -15,6 +15,8 @@ a. Miscellaneous
   load_script <script filename>
     Loads the script given by the filename into the interpreter. The filename
     must be in ~/.irssi/tcl/
+	
+	load_script_absolute <script filename>
 
 b. Server output
 
@@ -53,3 +55,6 @@ c. Irssi settings
   str_in_settings_str <key> <str>
     Returns true if str is in the settings string for key. Key value is
     assumed to be a list of strings separated by spaces.
+
+d. signals
+  emit_message_public <server> <channel> <nick> <address> <text>

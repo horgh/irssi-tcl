@@ -78,6 +78,33 @@ int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
  }
 
 /*
+	Emit a message public event
+	Does not actually send anything to the server, only to the client
+*/
+int
+emit_message_public(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	// emit_message_public <server> <channel> <nick> <address> <text>
+	if (objc != 6) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"emit_message_public server channel nick address text\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	char *server_tag = Tcl_GetString(objv[1]);
+	char *chan = Tcl_GetString(objv[2]);
+	char *nick = Tcl_GetString(objv[3]);
+	char *addr = Tcl_GetString(objv[4]);
+	char *text = Tcl_GetString(objv[5]);
+	SERVER_REC *server = server_find_tag(server_tag);
+	if (server == NULL) {
+		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found", server_tag);
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	signal_emit("message public", 5, server, text, nick, addr, chan);
+	return TCL_OK;
+}
+
+/*
  * Print string to Irssi from Tcl
  */
 int irssi_print(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
