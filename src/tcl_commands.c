@@ -25,6 +25,19 @@ int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 }
 
 /*
+	Stops the current signal
+*/
+int sig_stop(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+	if (objc != 1) {
+		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"signal_stop\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	signal_stop();
+	return TCL_OK;
+}
+
+/*
  * putserv_raw tcl interp command
  *
  * TODO: Any output from this command will not be seen on Irssi side
