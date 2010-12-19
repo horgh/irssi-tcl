@@ -16,6 +16,7 @@ typedef struct {
 static const Signal SignalTableFirst[] = {
 	{"message public", msg_pub},
 	{"expando timer", time_change},
+	{"send text", send_text},
 	{NULL, NULL}
 };
 
@@ -48,6 +49,24 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
 	}
+}
+
+/*
+	This is called when a user hits enter with a line in a window
+*/
+void send_text(char *line, SERVER_REC *server, WI_ITEM_REC *item) {
+	int result;
+	// Have to do this check as window_item_get_target() is invalid if so
+	if (item != NULL) {
+		const char *target = window_item_get_target(item);
+		result = execute(4, "emit_send_text", server->tag, target, line);
+	}	else {
+		result = execute(4, "emit_send_text", server->tag, "", line);
+	}
+
+	if (result != TCL_OK)
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text signal: %s", tcl_str_error());
+	//if (TCL_OK != execute(4, "emit_send_text", server->tag, target, line)) {
 }
 
 /*

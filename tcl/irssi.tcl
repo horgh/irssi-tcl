@@ -6,6 +6,7 @@
 set SCRIPT_PATH /tcl
 
 set signals(msg_pub) []
+set signals(send_text) []
 set ::tcl_interactive 0
 
 proc bgerror {msg} {
@@ -49,6 +50,14 @@ proc emit_msg_pub {server nick uhost target msg} {
 				$bind_proc $server $nick $uhost $target $rest
 			}
 		}
+	}
+}
+
+proc emit_send_text {server target line} {
+	# The keyword part of signals list has no meaning for send_text
+	foreach bind $::signals(send_text) {
+		set bind_proc [lindex $bind 1]
+		$bind_proc $server $target $line
 	}
 }
 
