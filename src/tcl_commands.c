@@ -88,7 +88,7 @@ int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 	irc_send_cmd((IRC_SERVER_REC *) server, Tcl_GetString(send_str));
 	signal_emit("message own_public", 3, server, text, chan);
 	return TCL_OK;
- }
+}
 
 /*
 	Emit a message public event

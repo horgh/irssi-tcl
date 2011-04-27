@@ -58,3 +58,5 @@ c. Irssi settings
 
 d. signals
   emit_message_public <server> <channel> <nick> <address> <text>
+
+	signal_stop

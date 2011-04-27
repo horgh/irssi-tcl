@@ -24,10 +24,12 @@ namespace eval urltitle {
 	signal_add msg_pub "*" urltitle::urltitle
 
 	::http::register https 443 ::tls::socket
+
+	variable debug 0
 }
 
-proc urltitle::urltitle {server nick uhost target msg} {
-	if {![str_in_settings_str urltitle_enabled_channels $target]} {
+proc urltitle::urltitle {server nick uhost chan msg} {
+	if {![str_in_settings_str urltitle_enabled_channels $chan]} {
 		return
 	}
 
@@ -35,31 +37,49 @@ proc urltitle::urltitle {server nick uhost target msg} {
 		return
 	}
 
-	set full_url []
-	if {[regexp -nocase -- {(https?://\S+)} $msg -> url]} {
-		set full_url $url
-	} elseif {[regexp -nocase -- {(www\.\S+)} $msg -> url]} {
-		set full_url "http://${url}"
-	}
-
-	if {$full_url == ""} {
+	set url [urltitle::recognise_url $msg]
+	if {$url == ""} {
 		return
 	}
 
-	if {![regexp -- {(https?://)([^/]*)/?(.*)} $full_url -> prefix domain rest]} {
-		error "urltitle parse problem: $full_url"
+	urltitle::geturl $url $server $chan
+}
+
+# Breaks an absolute URL into 3 pieces:
+# prefix/protocol: e.g. http://, https//
+# domain: e.g. everything up to the first /, if it exists
+# rest: everything after the first /, if exists
+proc urltitle::split_url {absolute_url} {
+	if {![regexp -- {(https?://)([^/]*)/?(.*)} $absolute_url -> prefix domain rest]} {
+		error "urltitle error: parse problem: $absolute_url"
 	}
 	set domain [idna::domain_toascii $domain]
-	#set rest [http::formatQuery $rest]
 
 	# from http-title.tcl by Pixelz. Avoids urls that will be treated as
 	# a flag
 	if {[string index $domain 0] eq "-"} {
-		return
+		error "urltitle error: Invalid URL: domain looks like a flag"
+	}
+	return [list $prefix $domain $rest]
+}
+
+# Attempt to recognise potential_url as an actual url in form of http[s]://...
+# Returns blank if unsuccessful
+proc urltitle::recognise_url {potential_url} {
+	set full_url []
+	if {[regexp -nocase -- {(https?://\S+)} $potential_url -> url]} {
+		set full_url $url
+	} elseif {[regexp -nocase -- {(www\.\S+)} $potential_url -> url]} {
+		set full_url "http://${url}"
 	}
 
-	set url "${prefix}${domain}/${rest}"
-	urltitle::geturl $url $server $target
+	if {$full_url == ""} {
+		return ""
+	}
+
+	lassign [urltitle::split_url $full_url] prefix domain rest
+
+	return "${prefix}${domain}/${rest}"
 }
 
 proc urltitle::extract_title {data} {
@@ -70,10 +90,13 @@ proc urltitle::extract_title {data} {
 	return ""
 }
 
-proc urltitle::geturl {url server target} {
+proc urltitle::geturl {url server chan} {
+	if {$urltitle::debug} {
+		irssi_print "urltitle debug: Trying to get URL: $url"
+	}
 	http::config -useragent $urltitle::useragent
 	set token [http::geturl $url -blocksize $urltitle::max_bytes -timeout 10000 \
-		-progress urltitle::http_progress -command "urltitle::http_done $server $target"]
+		-progress urltitle::http_progress -command "urltitle::http_done $server $chan $url"]
 }
 
 # stop after max_bytes
@@ -83,23 +106,60 @@ proc urltitle::http_progress {token total current} {
 	}
 }
 
-proc urltitle::http_done {server target token} {
+proc urltitle::http_done {server chan url token} {
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
+	if {$urltitle::debug} {
+		irssi_print "data ${data}"
+		irssi_print "code ${code}"
+		irssi_print "meta ${meta}"
+	}
 	set charset [urltitle::get_charset $token]
 	http::cleanup $token
 
 	# Follow redirects for some 30* codes
 	if {[regexp -- {30[01237]} $code]} {
-		urltitle::geturl [dict get $meta Location] $server $target
+		# Location may not be an absolute URL
+		set new_url [urltitle::make_absolute_url $url [dict get $meta Location]]
+		urltitle::geturl $new_url $server $chan
 	} else {
 		set data [encoding convertfrom $charset $data]
 		set title [extract_title $data]
 		if {$title != ""} {
-			putchan $server $target "\002[string trim $title]"
+			putchan $server $chan "\002[string trim $title]"
 		}
 	}
+}
+
+# Ensure we return an absolute URL
+# new_target is the Location given by a redirect. This may be an absolute
+# url, or it may be relative
+# If it's relative, use old_url
+proc urltitle::make_absolute_url {old_url new_target} {
+	# First check if we've been given an absolute URL
+	set absolute_url [urltitle::recognise_url $new_target]
+	if {$absolute_url != ""} {
+		return $absolute_url
+	}
+
+	# Otherwise it must be a relative URL
+	lassign [urltitle::split_url $old_url] prefix domain rest
+
+	# Take everything up to the last / from rest
+	if {[regexp -- {(\S+)/} $rest -> rest_prefix]} {
+		set new_url "${prefix}${domain}/${rest_prefix}/${new_target}"
+
+	# Otherwise there was no / in rest, so at top level
+	} else {
+		set new_url "${prefix}${domain}/${new_target}"
+	}
+
+	if {$urltitle::debug} {
+		irssi_print "urltitle debug: make_absolute_url: prefix: $prefix domain $domain rest $rest old_url $old_url new_url $new_url"
+	}
+
+	return $new_url
 }
 
 proc urltitle::get_charset {token} {
