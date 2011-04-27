@@ -17,6 +17,7 @@ namespace eval urltitle {
 	#variable useragent "Lynx/2.8.7rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/0.9.8n"
 	variable useragent "Tcl http client package 2.7.5"
 	variable max_bytes 32768
+	variable max_redirects 3
 
 	settings_add_str "urltitle_enabled_channels" ""
 	settings_add_str "urltitle_ignored_nicks" ""
@@ -42,7 +43,7 @@ proc urltitle::urltitle {server nick uhost chan msg} {
 		return
 	}
 
-	urltitle::geturl $url $server $chan
+	urltitle::geturl $url $server $chan 0
 }
 
 # Breaks an absolute URL into 3 pieces:
@@ -90,13 +91,16 @@ proc urltitle::extract_title {data} {
 	return ""
 }
 
-proc urltitle::geturl {url server chan} {
+proc urltitle::geturl {url server chan redirect_count} {
 	if {$urltitle::debug} {
 		irssi_print "urltitle debug: Trying to get URL: $url"
 	}
+	if {$redirect_count > $urltitle::max_redirects} {
+		return
+	}
 	http::config -useragent $urltitle::useragent
 	set token [http::geturl $url -blocksize $urltitle::max_bytes -timeout 10000 \
-		-progress urltitle::http_progress -command "urltitle::http_done $server $chan $url"]
+		-progress urltitle::http_progress -command "urltitle::http_done $server $chan $url $redirect_count"]
 }
 
 # stop after max_bytes
@@ -106,7 +110,7 @@ proc urltitle::http_progress {token total current} {
 	}
 }
 
-proc urltitle::http_done {server chan url token} {
+proc urltitle::http_done {server chan url redirect_count token} {
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
@@ -122,7 +126,7 @@ proc urltitle::http_done {server chan url token} {
 	if {[regexp -- {30[01237]} $code]} {
 		# Location may not be an absolute URL
 		set new_url [urltitle::make_absolute_url $url [dict get $meta Location]]
-		urltitle::geturl $new_url $server $chan
+		urltitle::geturl $new_url $server $chan [incr redirect_count]
 	} else {
 		set data [encoding convertfrom $charset $data]
 		set title [extract_title $data]
