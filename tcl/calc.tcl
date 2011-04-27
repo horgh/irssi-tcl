@@ -3,11 +3,19 @@
 # updated by horgh
 #
 
+# Part of tcllib
+package require math
+
 namespace eval calc {
 	signal_add msg_pub !calc calc::safe_calc
 	signal_add msg_pub .calc calc::safe_calc
 
 	settings_add_str "calc_enabled_channels" ""
+}
+
+proc ::tcl::mathfunc::factorial {n} {
+	#return [math::factorial [expr {int($n)}]]
+	return [math::factorial $n]
 }
 
 proc calc::is_op {str} {
