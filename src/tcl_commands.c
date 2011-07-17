@@ -73,20 +73,30 @@ int putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *co
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
-	char *server_tag = Tcl_GetString(objv[1]);
-	char *chan = Tcl_GetString(objv[2]);
-	char *text = Tcl_GetString(objv[3]);
-	SERVER_REC *server = server_find_tag(server_tag);
-	if (server == NULL) {
+	char* server_tag = Tcl_GetString(objv[1]);
+	char* target = Tcl_GetString(objv[2]);
+	char* msg = Tcl_GetString(objv[3]);
+	SERVER_REC *server_rec = server_find_tag(server_tag);
+	if (server_rec == NULL) {
 		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found", server_tag);
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
+	CHANNEL_REC* channel_rec = channel_find(server_rec, target);
+	if (channel_rec == NULL) {
+		Tcl_Obj* str = Tcl_ObjPrintf("channel '%s' not found on server '%s'",
+			target, server_tag);
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
 
-	Tcl_Obj *send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", chan, text);
+	Tcl_Obj *send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", target, msg);
+	irc_send_cmd((IRC_SERVER_REC *) server_rec, Tcl_GetString(send_str));
 
-	irc_send_cmd((IRC_SERVER_REC *) server, Tcl_GetString(send_str));
-	signal_emit("message own_public", 3, server, text, chan);
+	print_message_public(server_rec, channel_rec, target, server_rec->nick,
+		NULL, msg);
+
+	//signal_emit("message own_public", 3, server, text, chan);
 	return TCL_OK;
 }
 
@@ -114,6 +124,45 @@ emit_message_public(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj
 		return TCL_ERROR;
 	}
 	signal_emit("message public", 5, server, text, nick, addr, chan);
+	return TCL_OK;
+}
+
+/*
+	Similar to emit_message_public() in that the public message will be
+	printed to the Irssi screen as though it is a public message, but this
+	one does not cause an Irssi signal to be sent.
+*/
+int
+print_message_public_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj* const objv[])
+{
+	// print_message_public <server> <channel> <nick> <address> <text>
+	if (objc != 6) {
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"print_message_public server channel nick address text \"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	char* server_tag = Tcl_GetString(objv[1]);
+	// channel = target
+	char* target = Tcl_GetString(objv[2]);
+	char* nick = Tcl_GetString(objv[3]);
+	char* address = Tcl_GetString(objv[4]);
+	char* msg = Tcl_GetString(objv[5]);
+	SERVER_REC* server_rec = server_find_tag(server_tag);
+	if (server_rec == NULL) {
+		Tcl_Obj* str = Tcl_ObjPrintf("server with tag '%s' not found", server_tag);
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	CHANNEL_REC* channel_rec = channel_find(server_rec, target);
+	if (channel_rec == NULL) {
+		Tcl_Obj* str = Tcl_ObjPrintf("channel '%s' not found on server '%s'",
+			target, server_tag);
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+
+	print_message_public(server_rec, channel_rec, target, nick, address, msg);
 	return TCL_OK;
 }
 

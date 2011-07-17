@@ -15,6 +15,7 @@ typedef struct {
 // added with signal_add_first
 static const Signal SignalTableFirst[] = {
 	{"message public", msg_pub},
+	{"message own_public", msg_own_pub},
 	{"expando timer", time_change},
 	{"send text", send_text},
 	{NULL, NULL}
@@ -49,6 +50,20 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
 	}
+	// We don't want to print this any more. Let the Tcl module do it
+	signal_stop();
+}
+
+void msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
+/*
+	if (TCL_OK != execute(6, "print_message_public", server_rec->tag, target,
+			server_rec->nick, "", msg))
+	{
+		printtext(NULL, NULL, MSGLEVEL_CRAP,
+			"Tcl: Error emitting msg_pub_own signal: %s", tcl_str_error());
+	}
+	*/
+	signal_stop();
 }
 
 /*
@@ -95,4 +110,3 @@ void time_change() {
 	while (events > 0)
 		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
 }
-

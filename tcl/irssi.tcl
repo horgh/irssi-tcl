@@ -32,6 +32,7 @@ proc putchan {server_tag channel text} {
 	putchan_raw $server_tag $channel $text
 }
 
+# Called when Irssi finds a msg public signal
 proc emit_msg_pub {server nick uhost target msg} {
 	set l [split $msg]
 
@@ -39,6 +40,7 @@ proc emit_msg_pub {server nick uhost target msg} {
 	set keyword [lindex $l 0]
 	set rest [join [lrange $l 1 end]]
 
+	print_message_public $server $target $nick $uhost $msg
 	foreach bind $::signals(msg_pub) {
 		set bind_keyword [lindex $bind 0]
 		set bind_proc [lindex $bind 1]

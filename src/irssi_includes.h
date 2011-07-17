@@ -12,3 +12,5 @@
 #include <irc/core/irc.h>
 #include <irc/core/irc-commands.h>
 #include <irc/core/irc-servers.h>
+#include <fe-common/core/module-formats.h>
+#include <fe-common/core/fe-messages.h>

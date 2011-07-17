@@ -4,6 +4,8 @@
  *
  * Set up the Tcl interpreter and Irssi module
  * Also provide Irssi commands
+ *
+ * And some useful functions that don't really fit elsewhere
  */
 
 #include <tcl.h>
@@ -188,3 +190,75 @@ void tcl_deinit(void) {
 	deinit_signals();
 	Tcl_DeleteInterp(interp);
 }
+
+/*
+	Print a message using the public message format (to channel)
+	Can be from others or ourselves
+*/
+void
+print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
+	char* target, char* nick, char* address, char* msg)
+{
+	// See fe-common/core/fe-messages.c, sig_message_public()
+	// and fe-common/irc/fe-irc-messages.c, sig_message_irc_op_public()
+	// for the below.
+
+	char* nickmode = channel_get_nickmode(channel_rec, nick);
+
+	/*
+	int for_me = !settings_get_bool("hilight_nick_matches") ? false :
+		nick_match_msg(channel_rec, msg, server_rec->nick);
+	HILIGHT_REC* hilight_rec = for_me ? NULL :
+		hilight_match_nick(server_rec, target, nick, address, MSGLEVEL_PUBLIC, msg);
+	char* colour = hilight_rec == NULL ? NULL : hilight_get_color(hilight_rec);
+	*/
+	// Check if hilight
+	int for_me = nick_match_msg(channel_rec, msg, server_rec->nick);
+
+	// If channel is active, we don't need to use the format which includes
+	// channel name, such as <@nick:#channel>
+	int should_print_channel = channel_rec == NULL
+		|| !window_item_is_active( (WI_ITEM_REC*) channel_rec);
+	/*
+	should_print_channel = !should_print_channel
+		&& settings_get_bool("print_active_channel")
+		&& window_item_window( (WI_ITEM_REC*) channel_rec)->items->next != NULL;
+	*/
+
+	// Check if it was us that said this
+	int from_me = strcmp(nick, server_rec->nick) == 0;
+
+	// Fix up the message level
+	int msg_level = MSGLEVEL_PUBLIC;
+	// We don't want to hilight ourselves
+	if (!from_me && for_me)
+		msg_level |= MSGLEVEL_HILIGHT;
+	
+	// TODO to match normal behaviour better, probably want to add the
+	// HILIGHT_REC stuff from sig_message_public() (mentioned above)
+	// so that hilighted messages go to current window
+	
+	if (should_print_channel) {
+		if (from_me) {
+			printformat_module("fe-common/core", server_rec, target, msg_level,
+				TXT_OWN_MSG_CHANNEL,
+				nick, target, msg, nickmode);
+		} else {
+			printformat_module("fe-common/core", server_rec, target, msg_level,
+				for_me ? TXT_PUBMSG_ME_CHANNEL : TXT_PUBMSG_CHANNEL,
+				nick, target, msg, nickmode);
+		}
+	} else {
+		if (from_me) {
+			printformat_module("fe-common/core", server_rec, target, msg_level,
+				TXT_OWN_MSG,
+				nick, msg, nickmode);
+		} else {
+			printformat_module("fe-common/core", server_rec, target, msg_level,
+				for_me ? TXT_PUBMSG_ME : TXT_PUBMSG,
+				nick, msg, nickmode);
+		}
+	}
+	g_free_not_null(nickmode);
+}
+

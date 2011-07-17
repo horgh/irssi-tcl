@@ -14,3 +14,7 @@ void irssi_dir_ds (Tcl_DString *dsPtr, char *str);
 int tcl_reload_scripts();
 void tcl_init(void);
 void tcl_deinit(void);
+
+// misc useful functions
+void print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
+	char* target, char* nick, char* address, char* msg);
