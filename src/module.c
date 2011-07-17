@@ -205,25 +205,23 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 
 	char* nickmode = channel_get_nickmode(channel_rec, nick);
 
-	/*
-	int for_me = !settings_get_bool("hilight_nick_matches") ? false :
-		nick_match_msg(channel_rec, msg, server_rec->nick);
-	HILIGHT_REC* hilight_rec = for_me ? NULL :
-		hilight_match_nick(server_rec, target, nick, address, MSGLEVEL_PUBLIC, msg);
-	char* colour = hilight_rec == NULL ? NULL : hilight_get_color(hilight_rec);
-	*/
-	// Check if hilight
+	// Check if hilight by someone referring to me
 	int for_me = nick_match_msg(channel_rec, msg, server_rec->nick);
+
+	// Also can hilight based on address?
+	int hilight;
+	if (address != NULL) {
+		hilight = for_me
+			|| hilight_match_nick(server_rec, target, nick, address,
+					MSGLEVEL_PUBLIC, msg);
+	} else {
+		hilight = for_me;
+	}
 
 	// If channel is active, we don't need to use the format which includes
 	// channel name, such as <@nick:#channel>
 	int should_print_channel = channel_rec == NULL
 		|| !window_item_is_active( (WI_ITEM_REC*) channel_rec);
-	/*
-	should_print_channel = !should_print_channel
-		&& settings_get_bool("print_active_channel")
-		&& window_item_window( (WI_ITEM_REC*) channel_rec)->items->next != NULL;
-	*/
 
 	// Check if it was us that said this
 	int from_me = strcmp(nick, server_rec->nick) == 0;
@@ -231,7 +229,8 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	// Fix up the message level
 	int msg_level = MSGLEVEL_PUBLIC;
 	// We don't want to hilight ourselves
-	if (!from_me && for_me)
+	//if (!from_me && for_me)
+	if (!from_me && hilight)
 		msg_level |= MSGLEVEL_HILIGHT;
 	
 	// TODO to match normal behaviour better, probably want to add the
@@ -245,7 +244,8 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 				nick, target, msg, nickmode);
 		} else {
 			printformat_module("fe-common/core", server_rec, target, msg_level,
-				for_me ? TXT_PUBMSG_ME_CHANNEL : TXT_PUBMSG_CHANNEL,
+				//for_me ? TXT_PUBMSG_ME_CHANNEL : TXT_PUBMSG_CHANNEL,
+				hilight ? TXT_PUBMSG_ME_CHANNEL : TXT_PUBMSG_CHANNEL,
 				nick, target, msg, nickmode);
 		}
 	} else {
@@ -255,7 +255,8 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 				nick, msg, nickmode);
 		} else {
 			printformat_module("fe-common/core", server_rec, target, msg_level,
-				for_me ? TXT_PUBMSG_ME : TXT_PUBMSG,
+				//for_me ? TXT_PUBMSG_ME : TXT_PUBMSG,
+				hilight ? TXT_PUBMSG_ME : TXT_PUBMSG,
 				nick, msg, nickmode);
 		}
 	}
