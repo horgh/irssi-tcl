@@ -40,7 +40,8 @@ proc emit_msg_pub {server nick uhost target msg} {
 	set keyword [lindex $l 0]
 	set rest [join [lrange $l 1 end]]
 
-	print_message_public $server $target $nick $uhost $msg
+	set printed 0
+
 	foreach bind $::signals(msg_pub) {
 		set bind_keyword [lindex $bind 0]
 		set bind_proc [lindex $bind 1]
@@ -50,6 +51,13 @@ proc emit_msg_pub {server nick uhost target msg} {
 				$bind_proc $server $nick $uhost $target $msg
 			} else {
 				$bind_proc $server $nick $uhost $target $rest
+			}
+
+			# Print the pub here rather than through Irssi's signals
+			if {!$printed} {
+				signal_stop
+				print_message_public $server $target $nick $uhost $msg
+				set printed 1
 			}
 		}
 	}

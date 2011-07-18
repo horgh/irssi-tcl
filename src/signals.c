@@ -14,8 +14,6 @@ typedef struct {
 
 // added with signal_add_first
 static const Signal SignalTableFirst[] = {
-	{"message public", msg_pub},
-	{"message own_public", msg_own_pub},
 	{"expando timer", time_change},
 	{"send text", send_text},
 	{NULL, NULL}
@@ -23,6 +21,8 @@ static const Signal SignalTableFirst[] = {
 
 // added with signal_add_last
 static const Signal SignalTableLast[] = {
+	{"message public", msg_pub},
+	{"message own_public", msg_own_pub},
 	{"server sendmsg", server_sendmsg},
 	{NULL, NULL}
 };
@@ -51,19 +51,16 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
 	}
 	// We don't want to print this any more. Let the Tcl module do it
-	signal_stop();
+	//signal_stop();
 }
 
-void msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
 /*
-	if (TCL_OK != execute(6, "print_message_public", server_rec->tag, target,
-			server_rec->nick, "", msg))
-	{
-		printtext(NULL, NULL, MSGLEVEL_CRAP,
-			"Tcl: Error emitting msg_pub_own signal: %s", tcl_str_error());
+	Triggers on our own public messages
+*/
+void msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
+	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag, server_rec->nick, "", target, msg)) {
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
 	}
-	*/
-	signal_stop();
 }
 
 /*
@@ -91,6 +88,9 @@ void send_text(char *line, SERVER_REC *server, WI_ITEM_REC *item) {
  */
 void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
 	// public msg
+
+	// Used to trigger on own messages from here
+	/*
 	if (type == 0) {
 		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, server->nick, "", target, msg)) {
 			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
@@ -99,6 +99,7 @@ void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
 	} else {
 		// TODO emit msg to trigger on PM
 	}
+	*/
 }
 
 /*

@@ -229,13 +229,8 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	// Fix up the message level
 	int msg_level = MSGLEVEL_PUBLIC;
 	// We don't want to hilight ourselves
-	//if (!from_me && for_me)
 	if (!from_me && hilight)
 		msg_level |= MSGLEVEL_HILIGHT;
-	
-	// TODO to match normal behaviour better, probably want to add the
-	// HILIGHT_REC stuff from sig_message_public() (mentioned above)
-	// so that hilighted messages go to current window
 	
 	if (should_print_channel) {
 		if (from_me) {
@@ -244,7 +239,6 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 				nick, target, msg, nickmode);
 		} else {
 			printformat_module("fe-common/core", server_rec, target, msg_level,
-				//for_me ? TXT_PUBMSG_ME_CHANNEL : TXT_PUBMSG_CHANNEL,
 				hilight ? TXT_PUBMSG_ME_CHANNEL : TXT_PUBMSG_CHANNEL,
 				nick, target, msg, nickmode);
 		}
@@ -255,7 +249,6 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 				nick, msg, nickmode);
 		} else {
 			printformat_module("fe-common/core", server_rec, target, msg_level,
-				//for_me ? TXT_PUBMSG_ME : TXT_PUBMSG,
 				hilight ? TXT_PUBMSG_ME : TXT_PUBMSG,
 				nick, msg, nickmode);
 		}
