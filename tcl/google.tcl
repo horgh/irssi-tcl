@@ -26,8 +26,8 @@ package require json
 package require htmlparse
 
 namespace eval google {
-	# Not enforced for API queries
-	variable useragent "Lynx/2.8.8dev.2 libwww-FM/2.14 SSL-MM/1.4.1"
+	variable useragent_api "Lynx/2.8.8dev.2 libwww-FM/2.14 SSL-MM/1.4.1"
+	variable useragent_convert "Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0"
 
 	variable convert_url "http://www.google.ca/search"
 	variable convert_regexp {<table class=std>.*?<b>(.*?)</b>.*?</table>}
@@ -55,7 +55,7 @@ proc google::convert {server nick uhost chan argv} {
 		return
 	}
 
-	http::config -useragent $google::useragent
+	http::config -useragent $google::useragent_convert
 	set query [http::formatQuery q $argv]
 	set token [http::geturl ${google::convert_url}?${query} -command "google::convert_callback $server $chan"]
 }
@@ -114,6 +114,7 @@ proc google::api_handler {server chan argv url {num {}}} {
 		set num 4
 	}
 
+	http::config -useragent $google::useragent_api
 	set token [http::geturl ${url}?${query} -headers $headers -method GET -command "google::api_callback $server $chan $num"]
 }
 
