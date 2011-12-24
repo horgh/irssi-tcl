@@ -100,7 +100,7 @@ proc urltitle::geturl {url server chan redirect_count} {
 	}
 	http::config -useragent $urltitle::useragent
 	set token [http::geturl $url -blocksize $urltitle::max_bytes -timeout 10000 \
-		-progress urltitle::http_progress -command "urltitle::http_done $server $chan $url $redirect_count"]
+		-progress urltitle::http_progress -command "urltitle::http_done $server $chan $redirect_count"]
 }
 
 # stop after max_bytes
@@ -110,7 +110,13 @@ proc urltitle::http_progress {token total current} {
 	}
 }
 
-proc urltitle::http_done {server chan url redirect_count token} {
+proc urltitle::http_done {server chan redirect_count token} {
+	# Get state array out of token
+	upvar #0 $token state
+	# Get the URL out of the state array. We could pass it via the
+	# callback but issues with variable substitution if URL contains what
+	# appears to be variables?
+	set url $state(url)
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
