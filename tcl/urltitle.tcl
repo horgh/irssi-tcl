@@ -29,6 +29,13 @@ namespace eval urltitle {
 	variable debug 0
 }
 
+proc urltitle::log {msg} {
+	if {!$urltitle::debug} {
+		return
+	}
+	irssi_print "urltitle: $msg"
+}
+
 proc urltitle::urltitle {server nick uhost chan msg} {
 	if {![str_in_settings_str urltitle_enabled_channels $chan]} {
 		return
@@ -92,9 +99,7 @@ proc urltitle::extract_title {data} {
 }
 
 proc urltitle::geturl {url server chan redirect_count} {
-	if {$urltitle::debug} {
-		irssi_print "urltitle debug: Trying to get URL: $url"
-	}
+	urltitle::log "geturl: Trying to get URL: $url"
 	if {$redirect_count > $urltitle::max_redirects} {
 		return
 	}
@@ -120,12 +125,14 @@ proc urltitle::http_done {server chan redirect_count token} {
 	set data [http::data $token]
 	set code [http::ncode $token]
 	set meta [http::meta $token]
-	if {$urltitle::debug} {
-		irssi_print "data ${data}"
-		irssi_print "code ${code}"
-		irssi_print "meta ${meta}"
-	}
+	urltitle::log "http_done: trying to get charset"
 	set charset [urltitle::get_charset $token]
+	if {$urltitle::debug} {
+		#irssi_print "http_done: data ${data}"
+		irssi_print "http_done: code ${code}"
+		irssi_print "http_done: meta ${meta}"
+		irssi_print "http_done: got charset: $charset"
+	}
 	http::cleanup $token
 
 	# Follow redirects for some 30* codes
@@ -165,28 +172,99 @@ proc urltitle::make_absolute_url {old_url new_target} {
 		set new_url "${prefix}${domain}/${new_target}"
 	}
 
-	if {$urltitle::debug} {
-		irssi_print "urltitle debug: make_absolute_url: prefix: $prefix domain $domain rest $rest old_url $old_url new_url $new_url"
-	}
+	urltitle::log "make_absolute_url: prefix: $prefix domain $domain rest $rest old_url $old_url new_url $new_url"
 
 	return $new_url
 }
 
-proc urltitle::get_charset {token} {
-	upvar #0 $token state
-	if {[info exists state(charset)]} {
-		set charset $state(charset)
-	} else {
-		set charset iso8859-1
-	}
-	# needed as some charsets from state(charset) are invalid mapping
-	# to tcl charsets.
+# @param ::http token
+#
+# @return string charset. "" if not found.
+#
+# look for a charset in the Content-Type header.
+proc urltitle::get_charset_from_headers {token} {
+	urltitle::log "get_charset_from_headers: trying to get charset"
+	set meta [::http::meta $token]
 
+	# does the content-type key exist?
+	if {![dict exists $meta Content-Type]} {
+		urltitle::log "get_charset_from_headers: no content-type found"
+		return ""
+	}
+	set content_type [dict get $meta Content-Type]
+
+	# try to retrieve charset
+	set re {charset="?(.*?)"?;?}
+	set res [regexp -nocase -- $re $content_type m charset]
+	if {!$res} {
+		urltitle::log "get_charset_from_headers: no charset found"
+		return ""
+	}
+	urltitle::log "get_charset_from_headers: found charset: $charset"
+	return $charset
+}
+
+# @param ::http token
+#
+# @return string charset. "" if not found.
+#
+# look for a charset in the html <meta/> tag.
+proc urltitle::get_charset_from_body {token} {
+	urltitle::log "get_charset_from_body: trying to get charset"
+	set data [::http::data $token]
+
+	set re {<meta[^>]+?charset=(\S+)['"].*?>}
+	set res [regexp -nocase -- $re $data m charset]
+	if {!$res} {
+		urltitle::log "get_charset_from_body: no charset found"
+		return ""
+	}
+
+	urltitle::log "get_charset_from_body: found charset: $charset"
+	return $charset
+}
+
+# @param string charset   charset found from examining result
+#
+# @return string charset
+#
+# try translate the charset so as to be recognized as a tcl charset.
+# some may be specified by the result/document that are not an
+# exact match to tcl charset names.
+proc urltitle::translate_charset {charset} {
+	urltitle::log "translate_charset: got charset $charset"
+	set charset [string tolower $charset]
 	# iso-8859-1 must be changed to iso8859-1
 	regsub -- {iso-} $charset iso charset
 	# shift_jis -> shiftjis
 	regsub -- {shift_} $charset shift charset
+	urltitle::log "translate_charset: have charset $charset after translate"
 	return $charset
+}
+
+# @param ::http token
+#
+# @return string charset
+#
+# try to get the charset of the requested document.
+# first try http headers, then meta in body.
+# fall back to iso8859-1 if we don't find one.
+proc urltitle::get_charset {token} {
+	# the charset from the Content-Type meta-data value.
+	set charset [urltitle::get_charset_from_headers $token]
+	if {$charset != ""} {
+		return [urltitle::translate_charset $charset]
+	}
+
+	# no charset given in http header. try to get from the meta tag in the body.
+	set charset [urltitle::get_charset_from_body $token]
+	if {$charset != ""} {
+		return [urltitle::translate_charset $charset]
+	}
+
+	# default to iso8859-1.
+	set charset iso8859-1
+	return [urltitle::translate_charset $charset]
 }
 
 irssi_print "urltitle.tcl loaded"
