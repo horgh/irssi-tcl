@@ -212,8 +212,9 @@ proc urltitle::get_charset_from_headers {token} {
 proc urltitle::get_charset_from_body {token} {
 	urltitle::log "get_charset_from_body: trying to get charset"
 	set data [::http::data $token]
+	#urltitle::log "get_charset_from_body: body: $data"
 
-	set re {<meta[^>]+?charset=(\S+)['"].*?>}
+	set re {<meta[^>]+?charset=['"]?([a-zA-Z\-0-9]+)['"]?.*?>}
 	set res [regexp -nocase -- $re $data m charset]
 	if {!$res} {
 		urltitle::log "get_charset_from_body: no charset found"
