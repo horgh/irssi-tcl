@@ -2,6 +2,7 @@
 
 namespace eval countdown {
 	signal_add msg_pub .countdown countdown::countdown
+	signal_add msg_pub .cd countdown::countdown
 
 	settings_add_str "countdown_enabled_channels" ""
 
