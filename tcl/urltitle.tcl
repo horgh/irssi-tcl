@@ -1,4 +1,6 @@
 #
+# vim: tabstop=2:shiftwidth=2:noexpandtab
+#
 # Fetch title of URLs in channels
 #
 # /set urltitle_enabled_channels #channel1 #channel2 ..
@@ -90,9 +92,16 @@ proc urltitle::recognise_url {potential_url} {
 	return "${prefix}${domain}/${rest}"
 }
 
+# @param string $data The body of the page
+#
+# @return mixed the title (html decoded), or "" if not found
+#
+# pull the title out of the html body of a page
 proc urltitle::extract_title {data} {
 	if {[regexp -nocase -- {<title>(.*?)</title>} $data -> title]} {
 		set title [regsub -all -- {\s+} $title " "]
+		urltitle::log "extract_title: found raw title $title"
+		# mapEscapes decodes html encoded characters
 		return [htmlparse::mapEscapes $title]
 	}
 	return ""
@@ -104,8 +113,12 @@ proc urltitle::geturl {url server chan redirect_count} {
 		return
 	}
 	http::config -useragent $urltitle::useragent
-	set token [http::geturl $url -blocksize $urltitle::max_bytes -timeout 10000 \
-		-progress urltitle::http_progress -command "urltitle::http_done $server $chan $redirect_count"]
+	set token [http::geturl $url \
+		-binary 1 \
+		-blocksize $urltitle::max_bytes \
+		-timeout 10000 \
+		-progress urltitle::http_progress \
+		-command "urltitle::http_done $server $chan $redirect_count"]
 }
 
 # stop after max_bytes
@@ -137,16 +150,27 @@ proc urltitle::http_done {server chan redirect_count token} {
 
 	# Follow redirects for some 30* codes
 	if {[regexp -- {30[01237]} $code]} {
-		# Location may not be an absolute URL
-		set new_url [urltitle::make_absolute_url $url [dict get $meta Location]]
+		# we need a Location: header to follow.
+		set location [urltitle::dict_get_insensitive $meta Location]
+		if {$location == ""} {
+			urltitle::log "http_done: redirect code $code found, but no location header"
+		  return
+	  }
+		# the location may not be an absolute URL
+		set new_url [urltitle::make_absolute_url $url $location]
 		urltitle::geturl $new_url $server $chan [incr redirect_count]
 		return
 	}
 
+	# convert the data to unicode (internal) from its encoding.
 	set data [encoding convertfrom $charset $data]
 	set title [extract_title $data]
 	if {$title != ""} {
-		putchan $server $chan "\002[string trim $title]"
+		urltitle::log "http_done: title after extracting/decoding: $title"
+		set output [string trim $title]
+		# we do not need to encode to utf-8 - that gets taken care of
+		# by functions other than us.
+		putchan $server $chan "\002$output"
 	}
 }
 

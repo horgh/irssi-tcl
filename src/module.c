@@ -1,3 +1,4 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
 /*
  * 2010-08-26
  * by Will Storey
@@ -221,7 +222,7 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	// If channel is active, we don't need to use the format which includes
 	// channel name, such as <@nick:#channel>
 	int should_print_channel = channel_rec == NULL
-		|| !window_item_is_active( (WI_ITEM_REC*) channel_rec);
+		|| !window_item_is_active((WI_ITEM_REC*) channel_rec);
 
 	// Check if it was us that said this
 	int from_me = strcmp(nick, server_rec->nick) == 0;
@@ -229,8 +230,9 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	// Fix up the message level
 	int msg_level = MSGLEVEL_PUBLIC;
 	// We don't want to hilight ourselves
-	if (!from_me && hilight)
+	if (!from_me && hilight) {
 		msg_level |= MSGLEVEL_HILIGHT;
+	}
 	
 	if (should_print_channel) {
 		if (from_me) {
@@ -255,4 +257,3 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	}
 	g_free_not_null(nickmode);
 }
-

@@ -1,4 +1,6 @@
 #
+# vim: tabstop=2:shiftwidth=2:noexpandtab
+#
 # core Irssi Tcl script
 #
 
@@ -13,6 +15,10 @@ proc bgerror {msg} {
 	irssi_print "Error: $msg"
 }
 
+# @param string $text
+#
+# @return string
+#
 # Strip \n, \t, ending whitespace
 proc clean {text} {
 	regsub -all -- {\n} $text " " text
@@ -21,14 +27,31 @@ proc clean {text} {
 	return $text
 }
 
+# @param string $server_tag The Irssi server tag
+# @param string $channel The channel to send to
+#
+# @return void
+#
+# send a raw command to the server given by server tag
+#
 # Do some cleanup before sending to server
 proc putserv {server_tag text} {
 	set text [clean $text]
+	# putserv_raw is defined in C.
 	putserv_raw $server_tag $text
 }
 
+# @param string $server_tag The Irssi server tag
+# @param string $channel The channel to send to
+# @param string $text Text to output. This should be unicode (internal)
+#                     encoding.
+#
+# @return void
+#
+# output text to a channel.
 proc putchan {server_tag channel text} {
 	set text [clean $text]
+	# putchan_raw is defined in C.
 	putchan_raw $server_tag $channel $text
 }
 

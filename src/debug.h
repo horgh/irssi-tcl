@@ -1,3 +1,5 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
+
 #ifdef DEBUG
 #undef DEBUG
 #endif

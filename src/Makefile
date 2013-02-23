@@ -1,16 +1,39 @@
+#
+# vim: tabstop=2:shiftwidth=2:noexpandtab
+#
+# see README for compiling with debugging
+#
+
 TCL_DIR=/usr/include/tcl8.5
 IRSSI_DIR=/usr/include/irssi
 GLIB2_DIR=/usr/include/glib-2.0
 GLIB2_DIR_2=/usr/lib/glib-2.0
+GLIB2_DIR_3=/usr/lib/i386-linux-gnu/glib-2.0
 LIB_DIR=/usr/lib
 TCL_LIB=tcl8.5
 
 TCL_INCLUDES=-I$(TCL_DIR)
-IRSSI_INCLUDES=-I$(IRSSI_DIR) -I$(IRSSI_DIR)/src -I$(IRSSI_DIR)/src/core -I$(IRSSI_DIR)/src/fe-common/core -I$(IRSSI_DIR)/src/irc/core
-GLIB2_INCLUDES=-I$(GLIB2_DIR) -I$(GLIB2_DIR)/glib -I$(GLIB2_DIR_2) -I$(GLIB2_DIR_2)/include
+
+IRSSI_INCLUDES= \
+	-I$(IRSSI_DIR) -I$(IRSSI_DIR)/src -I$(IRSSI_DIR)/src/core \
+	-I$(IRSSI_DIR)/src/fe-common/core -I$(IRSSI_DIR)/src/irc/core
+
+GLIB2_INCLUDES= \
+	-I$(GLIB2_DIR) -I$(GLIB2_DIR)/glib \
+	-I$(GLIB2_DIR_2) -I$(GLIB2_DIR_2)/include \
+	-I$(GLIB2_DIR_3) -I$(GLIB2_DIR_3)/include \
 
 CC=gcc
+
 CFLAGS=-shared -Wall
+CFLAGS_NEW= \
+	-shared \
+	-std=c1x -O1 -g -ggdb -pedantic -Werror -Winit-self \
+	-Wall -Wextra -Wfloat-equal -Wundef -Wshadow -Wpointer-arith \
+	-Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
+	-Wwrite-strings -Waggregate-return -Wswitch-default \
+	-Wswitch-enum -Wconversion -Wunreachable-code -Wformat=2
+
 DFLAGS=-DHAVE_CONFIG_H
 LINKS=-l$(TCL_LIB) -L$(LIB_DIR)
 INCLUDES=-I. $(TCL_INCLUDES) $(IRSSI_INCLUDES) $(GLIB2_INCLUDES)
