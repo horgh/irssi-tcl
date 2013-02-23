@@ -6,9 +6,9 @@
 #include "irssi_includes.h"
 
 void
-init_signals();
+init_signals(void);
 void
-deinit_signals();
+deinit_signals(void);
 void
 msg_pub(SERVER_REC* server, char* msg, const char* nick, const char* address,
 	const char *target);
@@ -19,6 +19,6 @@ send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item);
 void
 server_sendmsg(SERVER_REC* server, char* target, char* msg, int type);
 void
-time_change();
+time_change(void);
 
 #endif

@@ -6,9 +6,10 @@
 
 TCL_DIR=/usr/include/tcl8.5
 IRSSI_DIR=/usr/include/irssi
+
+# also used /usr/lib/glib-2.0 in the past.
 GLIB2_DIR=/usr/include/glib-2.0
-GLIB2_DIR_2=/usr/lib/glib-2.0
-GLIB2_DIR_3=/usr/lib/i386-linux-gnu/glib-2.0
+GLIB2_DIR_2=/usr/lib/i386-linux-gnu/glib-2.0
 LIB_DIR=/usr/lib
 TCL_LIB=tcl8.5
 
@@ -16,26 +17,38 @@ TCL_INCLUDES=-I$(TCL_DIR)
 
 IRSSI_INCLUDES= \
 	-I$(IRSSI_DIR) -I$(IRSSI_DIR)/src -I$(IRSSI_DIR)/src/core \
-	-I$(IRSSI_DIR)/src/fe-common/core -I$(IRSSI_DIR)/src/irc/core
+	-I$(IRSSI_DIR)/src/fe-common/core -I$(IRSSI_DIR)/src/irc/core \
 
 GLIB2_INCLUDES= \
 	-I$(GLIB2_DIR) -I$(GLIB2_DIR)/glib \
 	-I$(GLIB2_DIR_2) -I$(GLIB2_DIR_2)/include \
-	-I$(GLIB2_DIR_3) -I$(GLIB2_DIR_3)/include \
 
 CC=gcc
 
-CFLAGS=\
-	-shared -Wall \
-	-std=c1x -O1 -g -ggdb \
-
-CFLAGS_NEW= \
+# -Wpadded generates from includes!
+CFLAGS = \
 	-shared \
-	-std=c1x -O1 -g -ggdb -pedantic -Werror -Winit-self \
-	-Wall -Wextra -Wfloat-equal -Wundef -Wshadow -Wpointer-arith \
+	-std=c11 -O1 -g -ggdb -pedantic -pedantic-errors \
+	-Werror -Wall -Wextra \
+	-Wformat-y2k -Wformat-nonliteral -Wformat-security \
+	-Wformat=2 \
+	-Winit-self \
+	-Wmissing-include-dirs -Wswitch-default \
+	-Wunused-local-typedefs \
+	-Wunused-parameter \
+	-Wunused-result \
+	-Wunused \
+	-Wuninitialized \
+	-Wfloat-equal -Wundef -Wshadow -Wpointer-arith \
+	-Wbad-function-cast \
+	-Wempty-body \
+	-Wsign-conversion -Wlogical-op -Waggregate-return \
 	-Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
-	-Wwrite-strings -Waggregate-return -Wswitch-default \
-	-Wswitch-enum -Wconversion -Wunreachable-code -Wformat=2
+	-Wold-style-definition -Wpacked \
+	-Wredundant-decls \
+	-Wnested-externs -Winline -Winvalid-pch \
+	-Wwrite-strings -Waggregate-return \
+	-Wswitch-enum -Wconversion -Wunreachable-code
 
 DFLAGS=-DHAVE_CONFIG_H
 LINKS=-l$(TCL_LIB) -L$(LIB_DIR)

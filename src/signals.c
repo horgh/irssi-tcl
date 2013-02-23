@@ -9,46 +9,24 @@
 
 #include "signals.h"
 
-typedef struct {
-	const char* type;
-	const void* func;
-} Signal;
-
-// added with signal_add_first
-static const Signal SignalTableFirst[] = {
-	{"expando timer", time_change},
-	{"send text", send_text},
-	{NULL, NULL}
-};
-
-// added with signal_add_last
-static const Signal SignalTableLast[] = {
-	{"message public", msg_pub},
-	{"message own_public", msg_own_pub},
-	{"server sendmsg", server_sendmsg},
-	{NULL, NULL}
-};
-
 void
-init_signals() {
-	int i;
-	for (i = 0; SignalTableFirst[i].type != NULL; i++)
-		signal_add_first(SignalTableFirst[i].type,
-			(SIGNAL_FUNC) SignalTableFirst[i].func);
-	for (i = 0; SignalTableLast[i].type != NULL; i++)
-		signal_add_last(SignalTableLast[i].type,
-			(SIGNAL_FUNC) SignalTableLast[i].func);
+init_signals(void) {
+	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
+	signal_add_first("send_text", (SIGNAL_FUNC) send_text);
+
+	signal_add_last("message public", (SIGNAL_FUNC) msg_pub);
+	signal_add_last("message own_public", (SIGNAL_FUNC) msg_own_pub);
+	signal_add_last("server sendmsg", server_sendmsg);
 }
 
 void
-deinit_signals() {
-	int i;
-	for (i = 0; SignalTableFirst[i].type != NULL; i++)
-		signal_remove(SignalTableFirst[i].type,
-			(SIGNAL_FUNC) SignalTableFirst[i].func);
-	for (i = 0; SignalTableLast[i].type != NULL; i++)
-		signal_remove(SignalTableLast[i].type,
-			(SIGNAL_FUNC) SignalTableLast[i].func);
+deinit_signals(void) {
+	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
+	signal_remove("send_text", (SIGNAL_FUNC) send_text);
+
+	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
+	signal_remove("message own_public", (SIGNAL_FUNC) msg_own_pub);
+	signal_remove("server sendmsg", (SIGNAL_FUNC) server_sendmsg);
 }
 
 /*
@@ -101,6 +79,10 @@ send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
  */
 void
 server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
+	(void) server;
+	(void) target;
+	(void) msg;
+	(void) type;
 	// public msg
 
 	// Used to trigger on own messages from here
@@ -121,7 +103,7 @@ server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
  * TODO: Look into hooking into as glib event source
  */
 void
-time_change() {
+time_change(void) {
 	int events = 1;
 	while (events > 0)
 		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);

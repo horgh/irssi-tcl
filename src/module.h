@@ -7,28 +7,28 @@
 #include "irssi_includes.h"
 
 void
-init_commands();
+init_commands(void);
 void
-deinit_commands();
+deinit_commands(void);
 void
 cmd_tcl(const char* data, void* server, WI_ITEM_REC* item);
 
 void
-tcl_register_commands();
+tcl_register_commands(void);
 int
-interp_init();
+interp_init(void);
 int
 tcl_command(const char* cmd);
 const char*
-tcl_str_result();
+tcl_str_result(void);
 const char*
-tcl_str_error();
+tcl_str_error(void);
 int
 execute(int num, ...);
 void
-irssi_dir_ds(Tcl_DString* dsPtr, char* str);
+irssi_dir_ds(Tcl_DString* dsPtr, const char* str);
 int
-tcl_reload_scripts();
+tcl_reload_scripts(void);
 void
 tcl_init(void);
 void

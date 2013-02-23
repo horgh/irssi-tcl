@@ -12,9 +12,12 @@
  * Return string corresponding to full path to ~/.irssi
  */
 int
-irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
+cmd_irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj *const objv[])
 {
+	(void) clientData;
+	(void) objv;
+
 	if (objc != 1) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_dir\"");
 		Tcl_SetObjResult(interp, str);
@@ -35,6 +38,9 @@ int
 sig_stop(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[])
 {
+	(void) clientData;
+	(void) objv;
+
 	if (objc != 1) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"signal_stop\"");
 		Tcl_SetObjResult(interp, str);
@@ -55,6 +61,8 @@ int
 putserv_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	if (objc != 3) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw server_tag text\"");
 		Tcl_SetObjResult(interp, str);
@@ -88,6 +96,8 @@ int
 putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	if (objc != 4) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putchan_raw"
 			" server_tag channel text\"");
@@ -123,7 +133,8 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	//Tcl_Obj *send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", target, msg);
 
 	// try to be more careful with how we build the string.
-	Tcl_Obj *send_str = Tcl_NewStringObj("PRIVMSG ", strlen("PRIVMSG "));
+	// -1 means take everything up to first NULL.
+	Tcl_Obj *send_str = Tcl_NewStringObj("PRIVMSG ", -1);
 	if (!send_str) {
 		return TCL_ERROR;
 	}
@@ -150,6 +161,8 @@ int
 emit_message_public(ClientData clientData, Tcl_Interp* interp,
 	int objc, Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	// emit_message_public <server> <channel> <nick> <address> <text>
 	if (objc != 6) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"emit_message_public server channel nick address text\"");
@@ -185,6 +198,8 @@ int
 print_message_public_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	// print_message_public <server> <channel> <nick> <address> <text>
 	if (objc != 6) {
 		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"print_message_public server channel nick address text \"");
@@ -229,6 +244,8 @@ int
 irssi_print(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	if (objc != 2) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_print string\"");
 		Tcl_SetObjResult(interp, str);
@@ -247,6 +264,8 @@ int
 settings_get_str_tcl(ClientData clientData, Tcl_Interp* interp,
 	int objc, Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	if (objc != 2) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_get_str settings_key\"");
 		Tcl_SetObjResult(interp, str);
@@ -262,7 +281,8 @@ settings_get_str_tcl(ClientData clientData, Tcl_Interp* interp,
 		return TCL_ERROR;
 	}
 
-	Tcl_Obj *str = Tcl_NewStringObj(value, strlen(value));
+	// -1 means take everything up to first NULL.
+	Tcl_Obj *str = Tcl_NewStringObj(value, -1);
 	Tcl_SetObjResult(interp, str);
 	return TCL_OK;
 }
@@ -274,6 +294,8 @@ int
 settings_add_str_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[])
 {
+	(void) clientData;
+
 	if (objc != 3) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_add_str key default\"");
 		Tcl_SetObjResult(interp, str);

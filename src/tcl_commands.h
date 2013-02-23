@@ -6,7 +6,7 @@
 #include <tcl.h>
 
 int
-irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
+cmd_irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[]);
 int
 sig_stop(ClientData clientData, Tcl_Interp* interp, int objc,
@@ -35,8 +35,8 @@ settings_add_str_tcl(ClientData clientData, Tcl_Interp* interp,
 	int objc, Tcl_Obj* const objv[]);
 
 typedef struct {
-	const char* cmd;
-	const void* func;
+	const char* const cmd;
+	int (*func)(ClientData, Tcl_Interp*, int, Tcl_Obj* const objv[]);
 } TclCmd;
 
 static const TclCmd TclCmdTable[] = {
@@ -47,7 +47,7 @@ static const TclCmd TclCmdTable[] = {
 	{"irssi_print", irssi_print},
 	{"settings_get_str", settings_get_str_tcl},
 	{"settings_add_str", settings_add_str_tcl},
-	{"irssi_dir", irssi_dir},
+	{"irssi_dir", cmd_irssi_dir},
 	{"signal_stop", sig_stop},
 	{NULL, NULL}
 };
