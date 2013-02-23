@@ -1,3 +1,11 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
+
+#ifndef __IRSSI_INCLUDES_H
+#define __IRSSI_INCLUDES_H
+
+// MODULE_NAME is used in Irssi.
+#define MODULE_NAME "tcl"
+
 #include <common.h>
 #include <core/servers.h>
 #include <core/settings.h>
@@ -15,3 +23,5 @@
 #include <fe-common/core/module-formats.h>
 #include <fe-common/core/fe-messages.h>
 #include <fe-common/core/hilight-text.h>
+
+#endif

@@ -1,4 +1,10 @@
 // vim: tabstop=2:shiftwidth=2:noexpandtab
+
+#ifndef __SIGNALS_H
+#define __SIGNALS_H
+
+#include "irssi_includes.h"
+
 void
 init_signals();
 void
@@ -14,3 +20,5 @@ void
 server_sendmsg(SERVER_REC* server, char* target, char* msg, int type);
 void
 time_change();
+
+#endif

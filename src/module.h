@@ -1,6 +1,10 @@
 // vim: tabstop=2:shiftwidth=2:noexpandtab
 
-#define MODULE_NAME "tcl"
+#ifndef __MODULE_H
+#define __MODULE_H
+
+#include <tcl.h>
+#include "irssi_includes.h"
 
 void
 init_commands();
@@ -34,3 +38,5 @@ tcl_deinit(void);
 void
 print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	char* target, char* nick, char* address, char* msg);
+
+#endif

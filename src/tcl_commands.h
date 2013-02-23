@@ -1,5 +1,10 @@
 // vim: tabstop=2:shiftwidth=2:noexpandtab
 
+#ifndef __TCL_COMMANDS_H
+#define __TCL_COMMANDS_H
+
+#include <tcl.h>
+
 int
 irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const objv[]);
@@ -46,3 +51,5 @@ static const TclCmd TclCmdTable[] = {
 	{"signal_stop", sig_stop},
 	{NULL, NULL}
 };
+
+#endif

@@ -25,7 +25,10 @@ GLIB2_INCLUDES= \
 
 CC=gcc
 
-CFLAGS=-shared -Wall
+CFLAGS=\
+	-shared -Wall \
+	-std=c1x -O1 -g -ggdb \
+
 CFLAGS_NEW= \
 	-shared \
 	-std=c1x -O1 -g -ggdb -pedantic -Werror -Winit-self \

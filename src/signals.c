@@ -4,9 +4,10 @@
  */
 
 #include <tcl.h>
-#include "irssi_includes.h"
-#include "signals.h"
 #include "module.h"
+#include "irssi_includes.h"
+
+#include "signals.h"
 
 typedef struct {
 	const char* type;
