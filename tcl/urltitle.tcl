@@ -140,12 +140,13 @@ proc urltitle::http_done {server chan redirect_count token} {
 		# Location may not be an absolute URL
 		set new_url [urltitle::make_absolute_url $url [dict get $meta Location]]
 		urltitle::geturl $new_url $server $chan [incr redirect_count]
-	} else {
-		set data [encoding convertfrom $charset $data]
-		set title [extract_title $data]
-		if {$title != ""} {
-			putchan $server $chan "\002[string trim $title]"
-		}
+		return
+	}
+
+	set data [encoding convertfrom $charset $data]
+	set title [extract_title $data]
+	if {$title != ""} {
+		putchan $server $chan "\002[string trim $title]"
 	}
 }
 
@@ -177,6 +178,26 @@ proc urltitle::make_absolute_url {old_url new_target} {
 	return $new_url
 }
 
+# @param dict $d A dict which from ::http::meta
+# @param string $key The key to look for.
+#
+# @return mixed value from the dict, or "" if not found
+#
+# retrieve a key from a dict where we do not care about the
+# case of the key.
+proc urltitle::dict_get_insensitive {d key} {
+	set key [string tolower $key]
+
+	# retrieve all keys from the dict.
+	set keys [dict keys $d]
+	foreach found_key $keys {
+		if {[string equal -nocase $found_key $key]} {
+			return [dict get $d $found_key]
+		}
+	}
+	return ""
+}
+
 # @param ::http token
 #
 # @return string charset. "" if not found.
@@ -186,12 +207,12 @@ proc urltitle::get_charset_from_headers {token} {
 	urltitle::log "get_charset_from_headers: trying to get charset"
 	set meta [::http::meta $token]
 
-	# does the content-type key exist?
-	if {![dict exists $meta Content-Type]} {
-		urltitle::log "get_charset_from_headers: no content-type found"
+	# get the Content-Type value if it exists.
+	set content_type [urltitle::dict_get_insensitive $meta Content-Type]
+	if {$content_type == ""} {
+		urltitle::log "get_charset_from_headers: no content-type header"
 		return ""
 	}
-	set content_type [dict get $meta Content-Type]
 
 	# try to retrieve charset
 	set re {charset="?(.*?)"?;?}
@@ -254,17 +275,20 @@ proc urltitle::get_charset {token} {
 	# the charset from the Content-Type meta-data value.
 	set charset [urltitle::get_charset_from_headers $token]
 	if {$charset != ""} {
+		urltitle::log "get_charset: charset from headers: $charset. translating"
 		return [urltitle::translate_charset $charset]
 	}
 
 	# no charset given in http header. try to get from the meta tag in the body.
 	set charset [urltitle::get_charset_from_body $token]
 	if {$charset != ""} {
+		urltitle::log "get_charset: charset from body: $charset. translating"
 		return [urltitle::translate_charset $charset]
 	}
 
 	# default to iso8859-1.
 	set charset iso8859-1
+	urltitle::log "get_charset: default charset $charset. translating."
 	return [urltitle::translate_charset $charset]
 }
 
