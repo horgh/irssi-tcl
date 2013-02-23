@@ -22,12 +22,14 @@
 static Tcl_Interp *interp;
 
 // bind Irssi /commands
-void init_commands() {
+void
+init_commands() {
 	command_bind("tcl", NULL, (SIGNAL_FUNC) cmd_tcl);
 }
 
 // unbind Irssi /commands
-void deinit_commands() {
+void
+deinit_commands() {
 	command_unbind("tcl", (SIGNAL_FUNC) cmd_tcl);
 }
 
@@ -35,7 +37,8 @@ void deinit_commands() {
  * /tcl
  * /tcl reload
  */
-void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
+void
+cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
 	// /tcl reload
 	if (strcmp(data, "reload") == 0) {
 		if(tcl_reload_scripts() == TCL_OK)
@@ -57,7 +60,8 @@ void cmd_tcl(const char *data, void *server, WI_ITEM_REC *item) {
 /*
  * register commands available to Tcl interpreter
  */
-void tcl_register_commands() {
+void
+tcl_register_commands() {
 	int i;
 	for (i = 0; TclCmdTable[i].cmd != NULL; i++)
 		Tcl_CreateObjCommand(interp, TclCmdTable[i].cmd, TclCmdTable[i].func, NULL, NULL);
@@ -66,7 +70,8 @@ void tcl_register_commands() {
 /*
  * Setup the Tcl interp
  */
-int interp_init() {
+int
+interp_init() {
 	interp = Tcl_CreateInterp();
 	if (interp == NULL)
 		return -1;
@@ -84,14 +89,16 @@ int interp_init() {
 /*
  * Execute command cmd in Tcl interp
  */
-int tcl_command(const char *cmd) {
+int
+tcl_command(const char* cmd) {
 	return Tcl_Eval(interp, cmd);
 }
 
 /*
  * Get string result in Tcl interp
  */
-const char *tcl_str_result() {
+const char*
+tcl_str_result() {
 	Tcl_Obj *obj = Tcl_GetObjResult(interp);
 	const char *str = Tcl_GetString(obj);
 	return str;
@@ -100,7 +107,8 @@ const char *tcl_str_result() {
 /*
  * Error string
  */
-const char *tcl_str_error() {
+const char*
+tcl_str_error() {
 	const char *result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
 	return result;
 }
@@ -111,7 +119,8 @@ const char *tcl_str_error() {
  *
  * Arguments must be valid C-strings.
  */
-int execute(int num, ...) {
+int
+execute(int num, ...) {
 	int i;
 	char *arg;
 	va_list vl;
@@ -139,7 +148,8 @@ int execute(int num, ...) {
  *
  * Note: str must be a valid c-string
  */
-void irssi_dir_ds (Tcl_DString *dsPtr, char *str) {
+void
+irssi_dir_ds(Tcl_DString* dsPtr, char* str) {
 	#ifdef DEBUG
 	const char *irssi_dir = DEBUG_IRSSI_PATH;
 	#else
@@ -153,7 +163,8 @@ void irssi_dir_ds (Tcl_DString *dsPtr, char *str) {
 	Tcl_DStringAppend(dsPtr, str, strlen(str));
 }
 
-int tcl_reload_scripts() {
+int
+tcl_reload_scripts() {
 	Tcl_DString dsPtr;
 	Tcl_DStringInit(&dsPtr);
 	irssi_dir_ds(&dsPtr, "/tcl/irssi.tcl");
@@ -165,7 +176,8 @@ int tcl_reload_scripts() {
 /*
  * Irssi module load
  */
-void tcl_init(void) {
+void
+tcl_init(void) {
 	module_register(MODULE_NAME, "core");
 
 	if(!interp_init()) {
@@ -186,7 +198,8 @@ void tcl_init(void) {
 /*
  * Irssi module unload
  */
-void tcl_deinit(void) {
+void
+tcl_deinit(void) {
 	deinit_commands();
 	deinit_signals();
 	Tcl_DeleteInterp(interp);

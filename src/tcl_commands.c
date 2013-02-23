@@ -11,7 +11,10 @@
 /*
  * Return string corresponding to full path to ~/.irssi
  */
-int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+int
+irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj *const objv[])
+{
 	if (objc != 1) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_dir\"");
 		Tcl_SetObjResult(interp, str);
@@ -28,7 +31,10 @@ int irssi_dir(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 /*
  *	Stops the current signal
  */
-int sig_stop(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+int
+sig_stop(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj* const objv[])
+{
 	if (objc != 1) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"signal_stop\"");
 		Tcl_SetObjResult(interp, str);
@@ -46,8 +52,8 @@ int sig_stop(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const
  * TODO: Any output from this command will not be seen on Irssi side
  */
 int
-putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc,
-	Tcl_Obj *const objv[])
+putserv_raw(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj* const objv[])
 {
 	if (objc != 3) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw server_tag text\"");
@@ -79,8 +85,8 @@ putserv_raw(ClientData clientData, Tcl_Interp *interp, int objc,
  * all command parameters should be using unicode (internal) encoding.
  */
 int
-putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc,
-	Tcl_Obj *const objv[])
+putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj* const objv[])
 {
 	if (objc != 4) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putchan_raw"
@@ -141,8 +147,8 @@ putchan_raw(ClientData clientData, Tcl_Interp *interp, int objc,
  * Does not actually send anything to the server, only to the client
  */
 int
-emit_message_public(ClientData clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[])
+emit_message_public(ClientData clientData, Tcl_Interp* interp,
+	int objc, Tcl_Obj* const objv[])
 {
 	// emit_message_public <server> <channel> <nick> <address> <text>
 	if (objc != 6) {
@@ -220,8 +226,8 @@ print_message_public_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
  * Print string to Irssi from Tcl
  */
 int
-irssi_print(ClientData clientData, Tcl_Interp *interp, int objc,
-	Tcl_Obj *const objv[])
+irssi_print(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj* const objv[])
 {
 	if (objc != 2) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_print string\"");
@@ -238,8 +244,8 @@ irssi_print(ClientData clientData, Tcl_Interp *interp, int objc,
  * settings_get_str Tcl command to get Irssi settings
  */
 int
-settings_get_str_tcl(ClientData clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[])
+settings_get_str_tcl(ClientData clientData, Tcl_Interp* interp,
+	int objc, Tcl_Obj* const objv[])
 {
 	if (objc != 2) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_get_str settings_key\"");
@@ -265,8 +271,8 @@ settings_get_str_tcl(ClientData clientData, Tcl_Interp *interp,
  * Add string setting from Tcl
  */
 int
-settings_add_str_tcl(ClientData clientData, Tcl_Interp *interp, int objc,
-	Tcl_Obj *const objv[])
+settings_add_str_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
+	Tcl_Obj* const objv[])
 {
 	if (objc != 3) {
 		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_add_str key default\"");

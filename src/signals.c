@@ -1,3 +1,4 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
 /*
  * Capture signals sent by Irssi and send them to Tcl
  */
@@ -8,8 +9,8 @@
 #include "module.h"
 
 typedef struct {
-	const char *type;
-	const void *func;
+	const char* type;
+	const void* func;
 } Signal;
 
 // added with signal_add_first
@@ -27,26 +28,35 @@ static const Signal SignalTableLast[] = {
 	{NULL, NULL}
 };
 
-void init_signals() {
+void
+init_signals() {
 	int i;
 	for (i = 0; SignalTableFirst[i].type != NULL; i++)
-		signal_add_first(SignalTableFirst[i].type, (SIGNAL_FUNC) SignalTableFirst[i].func);
+		signal_add_first(SignalTableFirst[i].type,
+			(SIGNAL_FUNC) SignalTableFirst[i].func);
 	for (i = 0; SignalTableLast[i].type != NULL; i++)
-		signal_add_last(SignalTableLast[i].type, (SIGNAL_FUNC) SignalTableLast[i].func);
+		signal_add_last(SignalTableLast[i].type,
+			(SIGNAL_FUNC) SignalTableLast[i].func);
 }
 
-void deinit_signals() {
+void
+deinit_signals() {
 	int i;
 	for (i = 0; SignalTableFirst[i].type != NULL; i++)
-		signal_remove(SignalTableFirst[i].type, (SIGNAL_FUNC) SignalTableFirst[i].func);
+		signal_remove(SignalTableFirst[i].type,
+			(SIGNAL_FUNC) SignalTableFirst[i].func);
 	for (i = 0; SignalTableLast[i].type != NULL; i++)
-		signal_remove(SignalTableLast[i].type, (SIGNAL_FUNC) SignalTableLast[i].func);
+		signal_remove(SignalTableLast[i].type,
+			(SIGNAL_FUNC) SignalTableLast[i].func);
 }
 
 /*
  * Called when "message public" signal from Irssi
  */
-void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *address, const char *target) {
+void
+msg_pub(SERVER_REC* server, char* msg, const char* nick,
+	const char* address, const char* target)
+{
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
 	}
@@ -57,7 +67,8 @@ void msg_pub(SERVER_REC *server, char *msg, const char *nick, const char *addres
 /*
 	Triggers on our own public messages
 */
-void msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
+void
+msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag, server_rec->nick, "", target, msg)) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
 	}
@@ -66,7 +77,8 @@ void msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
 /*
 	This is called when a user hits enter with a line in a window
 */
-void send_text(char *line, SERVER_REC *server, WI_ITEM_REC *item) {
+void
+send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
 	int result;
 	// Have to do this check as window_item_get_target() is invalid if so
 	if (item != NULL) {
@@ -86,7 +98,8 @@ void send_text(char *line, SERVER_REC *server, WI_ITEM_REC *item) {
  * (so that we can work with pub triggers that we trigger ourself)
  * NOTE: This includes msgs to channels (type = 0), and nicks (type = 1)
  */
-void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
+void
+server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
 	// public msg
 
 	// Used to trigger on own messages from here
@@ -106,7 +119,8 @@ void server_sendmsg(SERVER_REC *server, char *target, char *msg, int type) {
  * Ugly hack to check Tcl events!
  * TODO: Look into hooking into as glib event source
  */
-void time_change() {
+void
+time_change() {
 	int events = 1;
 	while (events > 0)
 		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
