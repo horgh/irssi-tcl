@@ -141,8 +141,9 @@ execute(int num, ...) {
 	va_end(vl);
 	int result = Tcl_EvalObjv(interp, num, objv, TCL_EVAL_DIRECT);
 	// Ensure string objects get freed
-	for (i = 0; i < num; i++)
+	for (i = 0; i < num; i++) {
 		Tcl_DecrRefCount(objv[i]);
+	}
 	ckfree((char *) objv);
 
 	return result;

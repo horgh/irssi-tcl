@@ -144,6 +144,9 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 
 	// send the command to the server.
 	irc_send_cmd((IRC_SERVER_REC *) server_rec, Tcl_GetString(send_str));
+	// this frees the object. unsure if I actually need to call this, but it
+	// seems like it doesn't matter if I do!
+	Tcl_DecrRefCount(send_str);
 
 	// write the message to Irssi so we see it ourselves.
 	print_message_public(server_rec, channel_rec, Tcl_GetString(target),
