@@ -146,7 +146,7 @@ proc ::bitcoincharts::output_market_data {server chan data} {
 
 		#set s "\002Bitcoin Market Data\002 ($symbol) ($currency): High: \$$high Low \$$low Bid: \$$bid Ask: \$$ask Average: \$$avg Close: \$$close Volume: $volume Currency volume: $currency_volume Latest trade: $latest_trade"
 
-		set s "\002Bitcoin\002 ($symbol): Last: $close ($latest_trade) Range: ($low - $high) Spread: ($bid X $ask) Volume: $volume"
+		set s "\002Bitcoin\002 ($symbol): \002Last\002: $close ($latest_trade) \002Range\002: ($low - $high) \002Spread\002: ($bid X $ask) \002Volume\002: $volume"
 		putchan $server $chan $s
 	}
 }
