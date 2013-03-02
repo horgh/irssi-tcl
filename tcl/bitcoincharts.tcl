@@ -20,7 +20,7 @@ namespace eval ::bitcoincharts {
 
 	# symbols we output.
 	#variable symbols [list mtgoxUSD mtgoxCAD mtgoxEUR btceUSD virtexCAD]
-	variable symbols [list mtgoxUSD mtgoxCAD]
+	variable symbols [list mtgoxUSD]
 
 	# amount of time to wait between queries. minutes.
 	variable query_delay 30
@@ -50,14 +50,60 @@ proc ::bitcoincharts::::log {msg} {
 	irssi_print "bitcoincharts: $msg"
 }
 
-# @param double $v
+# @param double $v Value to format
 #
-# @return double $v
+# @return double formatted
 #
-# format a double
+# format a double to less precision
 proc ::bitcoincharts::format_double {v} {
 	set v [format %.5f $v]
 	return $v
+}
+
+# @param double $v Value to format
+#
+# @return double formatted
+#
+# format a double to less precision and also insert commas
+# between every 3 (non decimal) digits.
+proc ::bitcoincharts::format_double_thousands {v} {
+	set v [::bitcoincharts::format_double $v]
+	# break the string on the '.'.
+	set number_parts [split $v .]
+	set whole_part [lindex $number_parts 0]
+	set fractional_part [lindex $number_parts 1]
+
+	# break the whole part into separate digits.
+	set whole_part_digits [split $whole_part {}]
+	# reverse the digits.
+	set whole_part_digits [lreverse $whole_part_digits]
+
+	# take up to 3 digits each time from this reversed list and
+	# put these groupings into another list.
+	# this is so we can deal with the case of not having full
+	# groups of 3.
+	set digit_groups [list]
+	while {[llength $whole_part_digits]} {
+		if {[expr [llength $whole_part_digits] >= 3]} {
+			set digit_group [lrange $whole_part_digits 0 2]
+			set whole_part_digits [lreplace $whole_part_digits 0 2]
+		} else {
+			set digit_group [lrange $whole_part_digits 0 end]
+			set whole_part_digits [lreplace $whole_part_digits 0 end]
+		}
+		# reverse the digit group digits as first part of reverting
+		# our original reverse.
+		set digit_group [lreverse $digit_group]
+		# make the digits a string instead of a list
+		set digit_group [join $digit_group {}]
+		lappend digit_groups $digit_group
+	}
+	# rebuild the whole part string. we also have to reverse
+	# the digit groups as the second step in undoing our reverse.
+	set whole_part [join [lreverse $digit_groups] ,]
+	# rebuild the full number.
+	set full [join [list $whole_part $fractional_part] .]
+	return $full
 }
 
 # @param dict $data The market data which we use for output
@@ -85,18 +131,22 @@ proc ::bitcoincharts::output_market_data {server chan data} {
 		set avg [dict get $d avg]
 		set low [dict get $d low]
 
-		# format these a bit.
+		# format the values a bit.
 		set latest_trade [clock format $latest_trade]
+
 		set high [::bitcoincharts::format_double $high]
 		set bid [::bitcoincharts::format_double $bid]
-		set volume [::bitcoincharts::format_double $volume]
 		set currency_volume [::bitcoincharts::format_double $currency_volume]
 		set ask [::bitcoincharts::format_double $ask]
 		set close [::bitcoincharts::format_double $close]
 		set avg [::bitcoincharts::format_double $avg]
 		set low [::bitcoincharts::format_double $low]
 
-		set s "\002Bitcoin Market Data\002 ($symbol) ($currency): High: \$$high Low \$$low Bid: \$$bid Ask: \$$ask Average: \$$avg Close: \$$close Volume: $volume Currency volume: $currency_volume Latest trade: $latest_trade"
+		set volume [::bitcoincharts::format_double_thousands $volume]
+
+		#set s "\002Bitcoin Market Data\002 ($symbol) ($currency): High: \$$high Low \$$low Bid: \$$bid Ask: \$$ask Average: \$$avg Close: \$$close Volume: $volume Currency volume: $currency_volume Latest trade: $latest_trade"
+
+		set s "\002Bitcoin\002 ($symbol): Last: $close ($latest_trade) Range: ($low - $high) Spread: ($bid X $ask) Volume: $volume"
 		putchan $server $chan $s
 	}
 }
@@ -150,6 +200,31 @@ proc ::bitcoincharts::btc_handler {server nick uhost chan argv} {
 		return
 	}
 	bitcoincharts::get_market_data $server $chan
+}
+
+# unit tests for format_double_thousands()
+proc ::bitcoincharts::test_format_double_thousands {} {
+	set tests [list]
+	lappend tests [list 123456789.89 123,456,789.89]
+	lappend tests [list 12345678.89 12,345,678.89]
+	lappend tests [list 1234567.89 1,234,567.89]
+	lappend tests [list 123456.89 123,456.89]
+	lappend tests [list 12345.89 12,345.89]
+	lappend tests [list 1234.89 1,234.89]
+	lappend tests [list 123.89 123.89]
+	lappend tests [list 12.89 12.89]
+	lappend tests [list 1.89 1.89]
+	lappend tests [list 0.89 0.89]
+	lappend tests [list 0.8 0.8]
+
+	foreach test $tests {
+		lassign $test value wanted
+		set r [::bitcoincharts::format_double_thousands $value]
+		if {$r != $wanted} {
+			puts "failure: $value should have given $wanted, but gave $r"
+		}
+		puts "success: $value gave $r"
+	}
 }
 
 irssi_print "bitcoincharts.tcl loaded"
