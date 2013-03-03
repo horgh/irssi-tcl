@@ -19,6 +19,16 @@ set ::tcl_interactive 0
 # to see which handler will be called for the current interpreter,
 # call:
 # interp bgerror {}
+# this default handler calls the bgerror() proc for us, so we do
+# not need to set our own bgerror handler. we only need to define
+# bgerror.
+#
+# NOTE: this does not get called for errors in the http package which
+#       occur in the '-command' callback as the http package catches
+#       the errors and stores them in the state variable instead.
+#
+#       a way around this is to wrap your callback function in a
+#       catch{} so as to have more control over errors.
 proc bgerror {msg} {
 	irssi_print "Error: $msg"
 }

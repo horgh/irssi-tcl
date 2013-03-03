@@ -46,3 +46,12 @@ d. Change "bind type flag trigger function"
 f. For non-blocking scripts you must use callback functions and use Tcl's
    event support. For the http:: package, this means using the -command flag
 	 with http::geturl.
+
+   Note: errors in the callback do not get passed up to the default
+   bgerror handler and so do not get printed in Irssi, so it may be
+   necessary to look at the error and status elements of the state
+   array to help debug. See http.tcl http::Finish() for where our
+   callback command is wrapped in catch {}.
+   
+   Another way around this is to wrap your entire callback function in
+   your own catch{} so you have more control over the errors.

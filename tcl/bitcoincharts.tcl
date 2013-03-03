@@ -16,7 +16,7 @@ package require tls
 namespace eval ::bitcoincharts {
 	# url to query.
 	variable url {http://bitcoincharts.com/t/markets.json}
-	#variable url {https://leviathan.summercat.com/~a/btc.json}
+	#variable url {https://leviathan.summercat.com/~a/code/markets.json}
 
 	# symbols we output.
 	#variable symbols [list mtgoxUSD mtgoxCAD mtgoxEUR btceUSD virtexCAD]
@@ -199,7 +199,7 @@ proc ::bitcoincharts::btc_handler {server nick uhost chan argv} {
 	if {![str_in_settings_str "bitcoincharts_enabled_channels" $chan]} {
 		return
 	}
-	bitcoincharts::get_market_data $server $chan
+	::bitcoincharts::get_market_data $server $chan
 }
 
 # unit tests for format_double_thousands()
