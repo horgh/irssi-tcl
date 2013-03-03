@@ -36,7 +36,9 @@ void
 msg_pub(SERVER_REC* server, char* msg, const char* nick,
 	const char* address, const char* target)
 {
-	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address, target, msg)) {
+	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address,
+		target, msg))
+	{
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
 	}
 	// We don't want to print this any more. Let the Tcl module do it
@@ -48,7 +50,9 @@ msg_pub(SERVER_REC* server, char* msg, const char* nick,
 */
 void
 msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
-	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag, server_rec->nick, "", target, msg)) {
+	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag,
+		server_rec->nick, "", target, msg))
+	{
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
 	}
 }
@@ -105,6 +109,10 @@ server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
 void
 time_change(void) {
 	int events = 1;
-	while (events > 0)
+	// XXX: hmm... in some cases at least Tcl_DoOneEvent() returns
+	//      how many events it executed, so while() we executed
+	//      one does not seem quite right...
+	while (events > 0) {
 		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
+	}
 }

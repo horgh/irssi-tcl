@@ -9,8 +9,16 @@ set SCRIPT_PATH /tcl
 
 set signals(msg_pub) []
 set signals(send_text) []
+# defines whether the tcl interpreter is operating in interactive
+# mode or not.
 set ::tcl_interactive 0
 
+# this procedure gets called by the background error handler.
+# see bgerror and interp documentation.
+#
+# to see which handler will be called for the current interpreter,
+# call:
+# interp bgerror {}
 proc bgerror {msg} {
 	irssi_print "Error: $msg"
 }

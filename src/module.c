@@ -19,7 +19,7 @@
 #include "debug.h"
 #endif
 
-static Tcl_Interp *interp;
+static Tcl_Interp* interp;
 
 // bind Irssi /commands
 void
@@ -77,8 +77,9 @@ tcl_register_commands(void) {
 int
 interp_init(void) {
 	interp = Tcl_CreateInterp();
-	if (interp == NULL)
+	if (interp == NULL) {
 		return -1;
+	}
 	
 	// Allow "package require"s to work
 	Tcl_Init(interp);
@@ -187,14 +188,14 @@ void
 tcl_init(void) {
 	module_register(MODULE_NAME, "core");
 
-	if(!interp_init()) {
+	if (!interp_init()) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Interp init error");
 		return;
 	}
 
 	tcl_register_commands();
 
-	if(tcl_reload_scripts() != TCL_OK) {
+	if (tcl_reload_scripts() != TCL_OK) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s (irssi.tcl not found?)", tcl_str_error());
 	}
 
