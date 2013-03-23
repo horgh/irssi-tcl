@@ -286,6 +286,8 @@ proc urltitle::translate_charset {charset} {
 	regsub -- {shift_} $charset shift charset
 	# windows-1252 -> cp1252
 	regsub -- {windows-1252} $charset cp1252 charset
+	# utf8 -> utf-8
+	regsub -- {utf8} $charset utf-8 charset
 	urltitle::log "translate_charset: have charset $charset after translate"
 	return $charset
 }
