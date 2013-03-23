@@ -35,7 +35,6 @@ namespace eval ::bitcoincharts {
 	variable debug 1
 
 	signal_add msg_pub !btc ::bitcoincharts::btc_handler
-	signal_add msg_pub btc ::bitcoincharts::btc_handler
 	signal_add msg_pub .btc ::bitcoincharts::btc_handler
 
 	settings_add_str "bitcoincharts_enabled_channels" ""
