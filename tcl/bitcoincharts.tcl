@@ -23,7 +23,7 @@ namespace eval ::bitcoincharts {
 	variable symbols [list mtgoxUSD]
 
 	# amount of time to wait between queries. minutes.
-	variable query_delay 30
+	variable query_delay 15
 
 	# last time we queried - cannot query more than every 15 min.
 	variable last_query {}
