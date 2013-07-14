@@ -10,6 +10,10 @@ init_commands(void);
 void
 deinit_commands(void);
 void
+init_signals(void);
+void
+deinit_signals(void);
+void
 cmd_tcl(const char*, void*, WI_ITEM_REC*);
 
 void

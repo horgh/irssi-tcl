@@ -28,6 +28,28 @@ deinit_commands(void) {
 	command_unbind("tcl", (SIGNAL_FUNC) cmd_tcl);
 }
 
+//! set up the signals we listen for.
+void
+init_signals(void) {
+	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
+	signal_add_first("send_text", (SIGNAL_FUNC) send_text);
+
+	signal_add_last("message public", (SIGNAL_FUNC) msg_pub);
+	signal_add_last("message own_public", (SIGNAL_FUNC) msg_own_pub);
+	signal_add_last("server sendmsg", server_sendmsg);
+}
+
+//! clear our signals.
+void
+deinit_signals(void) {
+	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
+	signal_remove("send_text", (SIGNAL_FUNC) send_text);
+
+	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
+	signal_remove("message own_public", (SIGNAL_FUNC) msg_own_pub);
+	signal_remove("server sendmsg", (SIGNAL_FUNC) server_sendmsg);
+}
+
 /*
  * /tcl
  * /tcl reload

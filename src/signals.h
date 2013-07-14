@@ -6,10 +6,6 @@
 #include "irssi_includes.h"
 
 void
-init_signals(void);
-void
-deinit_signals(void);
-void
 msg_pub(SERVER_REC*, char*, const char*, const char*,
 	const char*);
 void

@@ -1,6 +1,6 @@
 // vim: tabstop=2:shiftwidth=2:noexpandtab
 /*
- * Capture signals sent by Irssi and send them to Tcl
+ * signal callback functions.
  */
 
 #include <tcl.h>
@@ -10,24 +10,43 @@
 
 #include "signals.h"
 
+/*
+ * Ugly hack to check Tcl events!
+ * TODO: Look into hooking into as glib event source
+ */
 void
-init_signals(void) {
-	signal_add_first("expando timer", (SIGNAL_FUNC) time_change);
-	signal_add_first("send_text", (SIGNAL_FUNC) send_text);
-
-	signal_add_last("message public", (SIGNAL_FUNC) msg_pub);
-	signal_add_last("message own_public", (SIGNAL_FUNC) msg_own_pub);
-	signal_add_last("server sendmsg", server_sendmsg);
+time_change(void) {
+	int events = 1;
+	// XXX: hmm... in some cases at least Tcl_DoOneEvent() returns
+	//      how many events it executed, so while() we executed
+	//      one does not seem quite right...
+	while (events > 0) {
+		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
+	}
 }
 
+/*
+	This is called when a user hits enter with a line in a window
+*/
 void
-deinit_signals(void) {
-	signal_remove("expando timer", (SIGNAL_FUNC) time_change);
-	signal_remove("send_text", (SIGNAL_FUNC) send_text);
+send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
+	int result;
+	// Have to do this check as window_item_get_target() is invalid if so
+	if (item != NULL) {
+		const char* target = window_item_get_target(item);
+		result = execute(4, "emit_send_text", server->tag, target, line);
+	}	else {
+		result = execute(4, "emit_send_text", server->tag, "", line);
+	}
 
-	signal_remove("message public", (SIGNAL_FUNC) msg_pub);
-	signal_remove("message own_public", (SIGNAL_FUNC) msg_own_pub);
-	signal_remove("server sendmsg", (SIGNAL_FUNC) server_sendmsg);
+	if (result != TCL_OK) {
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text"
+			" signal: %s", tcl_str_error());
+	}
+
+	// I believe this emit_send_text may have been part of a being able
+	// to trigger on our own message approach.
+	//if (TCL_OK != execute(4, "emit_send_text", server->tag, target, line)) {
 }
 
 /*
@@ -61,30 +80,6 @@ msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
 }
 
 /*
-	This is called when a user hits enter with a line in a window
-*/
-void
-send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
-	int result;
-	// Have to do this check as window_item_get_target() is invalid if so
-	if (item != NULL) {
-		const char* target = window_item_get_target(item);
-		result = execute(4, "emit_send_text", server->tag, target, line);
-	}	else {
-		result = execute(4, "emit_send_text", server->tag, "", line);
-	}
-
-	if (result != TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text"
-			" signal: %s", tcl_str_error());
-	}
-
-	// I believe this emit_send_text may have been part of a being able
-	// to trigger on our own message approach.
-	//if (TCL_OK != execute(4, "emit_send_text", server->tag, target, line)) {
-}
-
-/*
  * Triggers on message sent by self, but not those sent by message own_public
  * (so that we can work with pub triggers that we trigger ourself)
  * NOTE: This includes msgs to channels (type = 0), and nicks (type = 1)
@@ -110,19 +105,4 @@ server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
 		// TODO emit msg to trigger on PM
 	}
 	*/
-}
-
-/*
- * Ugly hack to check Tcl events!
- * TODO: Look into hooking into as glib event source
- */
-void
-time_change(void) {
-	int events = 1;
-	// XXX: hmm... in some cases at least Tcl_DoOneEvent() returns
-	//      how many events it executed, so while() we executed
-	//      one does not seem quite right...
-	while (events > 0) {
-		events = Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
-	}
 }
