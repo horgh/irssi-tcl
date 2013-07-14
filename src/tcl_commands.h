@@ -6,37 +6,37 @@
 #include <tcl.h>
 
 int
-cmd_irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
-	Tcl_Obj* const objv[]);
+cmd_irssi_dir(ClientData, Tcl_Interp*, int,
+	Tcl_Obj* const []);
 int
-sig_stop(ClientData clientData, Tcl_Interp* interp, int objc,
-	Tcl_Obj* const objv[]);
+sig_stop(ClientData, Tcl_Interp*, int,
+	Tcl_Obj* const []);
 int
-putserv_raw(ClientData clientData, Tcl_Interp* interp, int objc,
-	Tcl_Obj* const objv[]);
+putserv_raw(ClientData, Tcl_Interp*, int,
+	Tcl_Obj* const []);
 int
-putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
-	Tcl_Obj* const objv[]);
+putchan_raw(ClientData, Tcl_Interp*, int,
+	Tcl_Obj* const []);
 int
-emit_message_public(ClientData clientData, Tcl_Interp* interp,
-	int objc, Tcl_Obj* const objv[]);
+emit_message_public(ClientData, Tcl_Interp*,
+	int, Tcl_Obj* const []);
 int
-print_message_public_tcl(ClientData clientData, Tcl_Interp* interp,
-	int objc, Tcl_Obj* const objv[]);
+print_message_public_tcl(ClientData, Tcl_Interp*,
+	int, Tcl_Obj* const []);
 
 int
-irssi_print(ClientData clientData, Tcl_Interp* interp, int objc,
-	Tcl_Obj* const objv[]);
+irssi_print(ClientData, Tcl_Interp*, int,
+	Tcl_Obj* const []);
 int
-settings_get_str_tcl(ClientData clientData, Tcl_Interp* interp,
-	int objc, Tcl_Obj* const objv[]);
+settings_get_str_tcl(ClientData, Tcl_Interp*,
+	int, Tcl_Obj* const []);
 int
-settings_add_str_tcl(ClientData clientData, Tcl_Interp* interp,
-	int objc, Tcl_Obj* const objv[]);
+settings_add_str_tcl(ClientData, Tcl_Interp*,
+	int, Tcl_Obj* const []);
 
 typedef struct {
 	const char* const cmd;
-	int (*func)(ClientData, Tcl_Interp*, int, Tcl_Obj* const objv[]);
+	int (*func)(ClientData, Tcl_Interp*, int, Tcl_Obj* const []);
 } TclCmd;
 
 static const TclCmd TclCmdTable[] = {

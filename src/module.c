@@ -45,10 +45,11 @@ cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
 
 	// /tcl reload
 	if (strcmp(data, "reload") == 0) {
-		if(tcl_reload_scripts() == TCL_OK)
+		if (tcl_reload_scripts() == TCL_OK) {
 			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Scripts reloaded");
-		else {
-			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure: %s", tcl_str_error());
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure: %s",
+				tcl_str_error());
 		}
 		return;
 	}
@@ -57,7 +58,8 @@ cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
 	if (tcl_command(data) == TCL_OK) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result: %s", tcl_str_result());
 	} else {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl command '%s': %s", data, tcl_str_error());
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl"
+			" command '%s': %s", data, tcl_str_error());
 	}
 }
 
@@ -66,9 +68,11 @@ cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
  */
 void
 tcl_register_commands(void) {
-	int i;
-	for (i = 0; TclCmdTable[i].cmd != NULL; i++)
-		Tcl_CreateObjCommand(interp, TclCmdTable[i].cmd, TclCmdTable[i].func, NULL, NULL);
+	int i = 0;
+	for (i = 0; TclCmdTable[i].cmd != NULL; i++) {
+		Tcl_CreateObjCommand(interp, TclCmdTable[i].cmd, TclCmdTable[i].func,
+			NULL, NULL);
+	}
 }
 
 /*
@@ -104,8 +108,8 @@ tcl_command(const char* cmd) {
  */
 const char*
 tcl_str_result(void) {
-	Tcl_Obj *obj = Tcl_GetObjResult(interp);
-	const char *str = Tcl_GetString(obj);
+	Tcl_Obj* obj = Tcl_GetObjResult(interp);
+	const char* str = Tcl_GetString(obj);
 	return str;
 }
 
@@ -114,7 +118,7 @@ tcl_str_result(void) {
  */
 const char*
 tcl_str_error(void) {
-	const char *result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
+	const char* result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
 	return result;
 }
 
@@ -127,14 +131,15 @@ tcl_str_error(void) {
 int
 execute(int num, ...) {
 	int i = 0;
-	char *arg = NULL;
+	char* arg = NULL;
 	va_list vl;
 	va_start(vl, num);
 
 	// create stringobjs and add to objv
-	Tcl_Obj **objv = (Tcl_Obj **) ckalloc((unsigned int) num * (unsigned int) sizeof(Tcl_Obj *));
+	Tcl_Obj** objv = (Tcl_Obj**) ckalloc((unsigned int) num
+		* (unsigned int) sizeof(Tcl_Obj*));
 	for (i = 0; i < num; i++) {
-		arg = va_arg(vl, char *);
+		arg = va_arg(vl, char*);
 		// -1 means take everything up to first NULL.
 		objv[i] = Tcl_NewStringObj(arg, -1);
 		Tcl_IncrRefCount(objv[i]);
@@ -145,7 +150,7 @@ execute(int num, ...) {
 	for (i = 0; i < num; i++) {
 		Tcl_DecrRefCount(objv[i]);
 	}
-	ckfree((char *) objv);
+	ckfree((char*) objv);
 
 	return result;
 }
@@ -158,10 +163,10 @@ execute(int num, ...) {
 void
 irssi_dir_ds(Tcl_DString* dsPtr, const char* str) {
 	#ifdef DEBUG
-	const char *irssi_dir = DEBUG_IRSSI_PATH;
+	const char* irssi_dir = DEBUG_IRSSI_PATH;
 	#else
 	// full path to ~/.irssi
-	const char *irssi_dir = get_irssi_dir();
+	const char* irssi_dir = get_irssi_dir();
 	#endif
 
 	// -1 means all up to the null.
@@ -196,7 +201,8 @@ tcl_init(void) {
 	tcl_register_commands();
 
 	if (tcl_reload_scripts() != TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation error: %s (irssi.tcl not found?)", tcl_str_error());
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation"
+			" error: %s (irssi.tcl not found?)", tcl_str_error());
 	}
 
 	init_commands();

@@ -39,7 +39,8 @@ msg_pub(SERVER_REC* server, char* msg, const char* nick,
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address,
 		target, msg))
 	{
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub signal: %s", tcl_str_error());
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+			" signal: %s", tcl_str_error());
 	}
 	// We don't want to print this any more. Let the Tcl module do it
 	//signal_stop();
@@ -53,7 +54,8 @@ msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag,
 		server_rec->nick, "", target, msg))
 	{
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+			" (in server_sendmsg) signal: %s", tcl_str_error());
 	}
 }
 
@@ -65,14 +67,19 @@ send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
 	int result;
 	// Have to do this check as window_item_get_target() is invalid if so
 	if (item != NULL) {
-		const char *target = window_item_get_target(item);
+		const char* target = window_item_get_target(item);
 		result = execute(4, "emit_send_text", server->tag, target, line);
 	}	else {
 		result = execute(4, "emit_send_text", server->tag, "", line);
 	}
 
-	if (result != TCL_OK)
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text signal: %s", tcl_str_error());
+	if (result != TCL_OK) {
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text"
+			" signal: %s", tcl_str_error());
+	}
+
+	// I believe this emit_send_text may have been part of a being able
+	// to trigger on our own message approach.
 	//if (TCL_OK != execute(4, "emit_send_text", server->tag, target, line)) {
 }
 
@@ -92,8 +99,10 @@ server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
 	// Used to trigger on own messages from here
 	/*
 	if (type == 0) {
-		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, server->nick, "", target, msg)) {
-			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub (in server_sendmsg) signal: %s", tcl_str_error());
+		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, server->nick, "",
+			target, msg)) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+				" (in server_sendmsg) signal: %s", tcl_str_error());
 		}
 	// private msg
 	} else {

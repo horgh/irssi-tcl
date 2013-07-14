@@ -10,14 +10,14 @@ init_signals(void);
 void
 deinit_signals(void);
 void
-msg_pub(SERVER_REC* server, char* msg, const char* nick, const char* address,
-	const char *target);
+msg_pub(SERVER_REC*, char*, const char*, const char*,
+	const char*);
 void
-msg_own_pub(SERVER_REC* server_rec, char* msg, char* target);
+msg_own_pub(SERVER_REC*, char*, char*);
 void
-send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item);
+send_text(char*, SERVER_REC*, WI_ITEM_REC*);
 void
-server_sendmsg(SERVER_REC* server, char* target, char* msg, int type);
+server_sendmsg(SERVER_REC*, char*, char*, int);
 void
 time_change(void);
 

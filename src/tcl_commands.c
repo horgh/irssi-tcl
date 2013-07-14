@@ -13,13 +13,13 @@
  */
 int
 cmd_irssi_dir(ClientData clientData, Tcl_Interp* interp, int objc,
-	Tcl_Obj *const objv[])
+	Tcl_Obj* const objv[])
 {
 	(void) clientData;
 	(void) objv;
 
 	if (objc != 1) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_dir\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"irssi_dir\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -42,7 +42,7 @@ sig_stop(ClientData clientData, Tcl_Interp* interp, int objc,
 	(void) objv;
 
 	if (objc != 1) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"signal_stop\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"signal_stop\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -64,7 +64,8 @@ putserv_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	(void) clientData;
 
 	if (objc != 3) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw server_tag text\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"putserv_raw"
+			" server_tag text\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -72,15 +73,15 @@ putserv_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const text = objv[2];
 
 	// find the Irssi server with the given tag.
-	SERVER_REC *server = server_find_tag(Tcl_GetString(server_tag));
+	SERVER_REC* server = server_find_tag(Tcl_GetString(server_tag));
 	if (server == NULL) {
-		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found",
+		Tcl_Obj* str = Tcl_ObjPrintf("server with tag '%s' not found",
 			Tcl_GetString(server_tag));
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
 
-	irc_send_cmd((IRC_SERVER_REC *) server, Tcl_GetString(text));
+	irc_send_cmd((IRC_SERVER_REC*) server, Tcl_GetString(text));
 	return TCL_OK;
 }
 
@@ -99,7 +100,7 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	(void) clientData;
 
 	if (objc != 4) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"putchan_raw"
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"putchan_raw"
 			" server_tag channel text\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
@@ -109,9 +110,9 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const msg = objv[3];
 
 	// find the server in Irssi.
-	SERVER_REC *server_rec = server_find_tag(Tcl_GetString(server_tag));
+	SERVER_REC* server_rec = server_find_tag(Tcl_GetString(server_tag));
 	if (server_rec == NULL) {
-		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found",
+		Tcl_Obj* str = Tcl_ObjPrintf("server with tag '%s' not found",
 			Tcl_GetString(server_tag));
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
@@ -130,11 +131,11 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 
 	// this is how we used to create the command but I am concerned it
 	// is not dealing with encoding correctly.
-	//Tcl_Obj *send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", target, msg);
+	//Tcl_Obj* send_str = Tcl_ObjPrintf("PRIVMSG %s :%s", target, msg);
 
 	// try to be more careful with how we build the string.
 	// -1 means take everything up to first NULL.
-	Tcl_Obj *send_str = Tcl_NewStringObj("PRIVMSG ", -1);
+	Tcl_Obj* send_str = Tcl_NewStringObj("PRIVMSG ", -1);
 	if (!send_str) {
 		return TCL_ERROR;
 	}
@@ -143,7 +144,7 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_AppendObjToObj(send_str, msg);
 
 	// send the command to the server.
-	irc_send_cmd((IRC_SERVER_REC *) server_rec, Tcl_GetString(send_str));
+	irc_send_cmd((IRC_SERVER_REC*) server_rec, Tcl_GetString(send_str));
 	// this frees the object. unsure if I actually need to call this, but it
 	// seems like it doesn't matter if I do!
 	Tcl_DecrRefCount(send_str);
@@ -168,7 +169,8 @@ emit_message_public(ClientData clientData, Tcl_Interp* interp,
 
 	// emit_message_public <server> <channel> <nick> <address> <text>
 	if (objc != 6) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"emit_message_public server channel nick address text\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be"
+			" \"emit_message_public server channel nick address text\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -179,9 +181,9 @@ emit_message_public(ClientData clientData, Tcl_Interp* interp,
 	Tcl_Obj* const text = objv[5];
 
 	// find the Irssi server by tag.
-	SERVER_REC *server = server_find_tag(Tcl_GetString(server_tag));
+	SERVER_REC* server = server_find_tag(Tcl_GetString(server_tag));
 	if (server == NULL) {
-		Tcl_Obj *str = Tcl_ObjPrintf("server with tag '%s' not found",
+		Tcl_Obj* str = Tcl_ObjPrintf("server with tag '%s' not found",
 			Tcl_GetString(server_tag));
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
@@ -205,7 +207,8 @@ print_message_public_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
 
 	// print_message_public <server> <channel> <nick> <address> <text>
 	if (objc != 6) {
-		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"print_message_public server channel nick address text \"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be"
+			" \"print_message_public server channel nick address text \"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -250,7 +253,8 @@ irssi_print(ClientData clientData, Tcl_Interp* interp, int objc,
 	(void) clientData;
 
 	if (objc != 2) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"irssi_print string\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be"
+			" \"irssi_print string\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
@@ -270,22 +274,23 @@ settings_get_str_tcl(ClientData clientData, Tcl_Interp* interp,
 	(void) clientData;
 
 	if (objc != 2) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_get_str settings_key\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be"
+			" \"settings_get_str settings_key\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
 	Tcl_Obj* const key = objv[1];
 
 	// find the setting value.
-	const char *value = settings_get_str(Tcl_GetString(key));
+	const char* value = settings_get_str(Tcl_GetString(key));
 	if (value == NULL) {
-		Tcl_Obj *str = Tcl_ObjPrintf("error: setting key not found");
+		Tcl_Obj* str = Tcl_ObjPrintf("error: setting key not found");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
 
 	// -1 means take everything up to first NULL.
-	Tcl_Obj *str = Tcl_NewStringObj(value, -1);
+	Tcl_Obj* str = Tcl_NewStringObj(value, -1);
 	Tcl_SetObjResult(interp, str);
 	return TCL_OK;
 }
@@ -300,7 +305,8 @@ settings_add_str_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
 	(void) clientData;
 
 	if (objc != 3) {
-		Tcl_Obj *str = Tcl_ObjPrintf("wrong # args: should be \"settings_add_str key default\"");
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be"
+			" \"settings_add_str key default\"");
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
