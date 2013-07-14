@@ -26,17 +26,33 @@ cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
 		if (tcl_reload_scripts() == TCL_OK) {
 			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Scripts reloaded");
 		} else {
-			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure: %s",
-				tcl_str_error());
+			const char* const tcl_error = tcl_str_error();
+			if (tcl_error) {
+				printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure: %s",
+					tcl_error);
+			} else {
+				printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Reload failure.");
+			}
 		}
 		return;
 	}
 
 	printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Running /tcl: '%s'", data);
 	if (tcl_command(data) == TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result: %s", tcl_str_result());
+		const char* const tcl_result = tcl_str_result();
+		if (tcl_result) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result: %s", tcl_result);
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Result:");
+		}
 	} else {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl"
-			" command '%s': %s", data, tcl_str_error());
+		const char* const tcl_error = tcl_str_error();
+		if (tcl_error) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl"
+				" command '%s': %s", data, tcl_error);
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error executing /tcl"
+				" command '%s'.", data);
+		}
 	}
 }

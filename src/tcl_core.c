@@ -4,7 +4,10 @@
  */
 
 #include <stdbool.h>
+#include <string.h>
+
 #include <tcl.h>
+
 #include "tcl_commands.h"
 #include "tcl_core.h"
 #include "debug.h"
@@ -16,6 +19,10 @@ static Tcl_Interp* interp;
  */
 void
 tcl_register_commands(void) {
+	if (!interp) {
+		return;
+	}
+
 	int i = 0;
 	for (i = 0; TclCmdTable[i].cmd != NULL; i++) {
 		Tcl_CreateObjCommand(interp, TclCmdTable[i].cmd, TclCmdTable[i].func,
@@ -71,6 +78,9 @@ tcl_interp_deinit(void) {
  */
 int
 tcl_command(const char* cmd) {
+	if (!interp || !cmd || strlen(cmd) == 0) {
+		return TCL_ERROR;
+	}
 	return Tcl_Eval(interp, cmd);
 }
 
@@ -79,6 +89,10 @@ tcl_command(const char* cmd) {
  */
 const char*
 tcl_str_result(void) {
+	if (!interp) {
+		return NULL;
+	}
+
 	Tcl_Obj* obj = Tcl_GetObjResult(interp);
 	const char* str = Tcl_GetString(obj);
 	return str;
@@ -104,6 +118,13 @@ tcl_str_error(void) {
  */
 int
 execute(int num, ...) {
+	if (!interp) {
+		return TCL_ERROR;
+	}
+	if (num < 1) {
+		return TCL_ERROR;
+	}
+
 	int i = 0;
 	char* arg = NULL;
 	va_list vl;
@@ -156,6 +177,10 @@ irssi_dir_ds(Tcl_DString* dsPtr, const char* str) {
  */
 int
 tcl_load_scripts(void) {
+	if (!interp) {
+		return TCL_ERROR;
+	}
+
 	Tcl_DString dsPtr;
 	Tcl_DStringInit(&dsPtr);
 	irssi_dir_ds(&dsPtr, "/tcl/irssi.tcl");

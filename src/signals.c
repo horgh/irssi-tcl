@@ -40,8 +40,14 @@ send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
 	}
 
 	if (result != TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text"
-			" signal: %s", tcl_str_error());
+		const char* const tcl_error = tcl_str_error();
+		if (tcl_error) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text"
+				" signal: %s", tcl_error);
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting send_text"
+				" signal.");
+		}
 	}
 
 	// I believe this emit_send_text may have been part of a being able
@@ -59,8 +65,14 @@ msg_pub(SERVER_REC* server, char* msg, const char* nick,
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address,
 		target, msg))
 	{
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
-			" signal: %s", tcl_str_error());
+		const char* const tcl_error = tcl_str_error();
+		if (tcl_error) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+				" signal: %s", tcl_error);
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+				" signal.");
+		}
 	}
 	// We don't want to print this any more. Let the Tcl module do it
 	//signal_stop();
@@ -74,8 +86,14 @@ msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
 	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag,
 		server_rec->nick, "", target, msg))
 	{
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
-			" (in server_sendmsg) signal: %s", tcl_str_error());
+		const char* const tcl_error = tcl_str_error();
+		if (tcl_error) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+				" (in server_sendmsg) signal: %s", tcl_error);
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+				" (in server_sendmsg) signal.");
+		}
 	}
 }
 
@@ -97,8 +115,14 @@ server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
 	if (type == 0) {
 		if (TCL_OK != execute(6, "emit_msg_pub", server->tag, server->nick, "",
 			target, msg)) {
-			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
-				" (in server_sendmsg) signal: %s", tcl_str_error());
+			const char* const tcl_error = tcl_str_error();
+			if (tcl_error) {
+				printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+					" (in server_sendmsg) signal: %s", tcl_error);
+			} else {
+				printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Error emitting msg_pub"
+					" (in server_sendmsg) signal.");
+			}
 		}
 	// private msg
 	} else {

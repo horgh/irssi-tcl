@@ -51,8 +51,6 @@ deinit_signals(void) {
  */
 void
 tcl_init(void) {
-	module_register(MODULE_NAME, "core");
-
 	if (!tcl_interp_init()) {
 		const char* const tcl_error = tcl_str_error();
 		if (tcl_error) {
@@ -69,6 +67,8 @@ tcl_init(void) {
 
 	init_commands();
 	init_signals();
+
+	module_register(MODULE_NAME, "core");
 }
 
 /*
