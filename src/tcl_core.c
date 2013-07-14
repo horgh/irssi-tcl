@@ -9,8 +9,10 @@
 #include <tcl.h>
 
 #include "tcl_commands.h"
-#include "tcl_core.h"
 #include "debug.h"
+#include "irssi_includes.h"
+
+#include "tcl_core.h"
 
 static Tcl_Interp* interp;
 
@@ -157,7 +159,7 @@ execute(int num, ...) {
  */
 void
 irssi_dir_ds(Tcl_DString* dsPtr, const char* str) {
-	#ifdef DEBUG
+	#ifdef DEBUG_IRSSI_PATH
 	const char* irssi_dir = DEBUG_IRSSI_PATH;
 	#else
 	// full path to ~/.irssi
