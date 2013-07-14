@@ -7,6 +7,7 @@
 #include "irssi_includes.h"
 #include "module.h"
 #include "tcl_commands.h"
+#include "tcl_core.h"
 #include "irssi.h"
 
 /*
