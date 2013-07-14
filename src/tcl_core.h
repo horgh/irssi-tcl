@@ -1,3 +1,4 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
 #ifndef __TCL_H
 #define __TCL_H
 
@@ -19,6 +20,8 @@ int
 execute(int num, ...);
 void
 irssi_dir_ds(Tcl_DString*, const char*);
+int
+tcl_load_scripts(void);
 int
 tcl_reload_scripts(void);
 

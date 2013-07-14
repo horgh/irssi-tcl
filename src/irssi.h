@@ -1,3 +1,4 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
 #ifndef __IRSSI_H
 #define __IRSSI_H
 

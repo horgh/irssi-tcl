@@ -1,3 +1,4 @@
+// vim: tabstop=2:shiftwidth=2:noexpandtab
 /*
  * Core Tcl functionality
  */
@@ -6,6 +7,7 @@
 #include "tcl_commands.h"
 #include "tcl_core.h"
 #include "irssi_includes.h"
+#include "debug.h"
 
 static Tcl_Interp* interp;
 
@@ -26,8 +28,8 @@ tcl_register_commands(void) {
  */
 int
 tcl_interp_init(void) {
-  // first destroy the interpreter if one exists.
-  tcl_interp_deinit();
+	// first destroy the interpreter if one exists.
+	tcl_interp_deinit();
 
 	interp = Tcl_CreateInterp();
 	if (interp == NULL) {
@@ -41,11 +43,11 @@ tcl_interp_init(void) {
 	// Encoding. Force utf-8 for now
 	Tcl_SetSystemEncoding(interp, "utf-8");
 
-  // register all Tcl commands.
+	// register all Tcl commands.
 	tcl_register_commands();
-  // load the Tcl scripts.
 
-	if (tcl_reload_scripts() != TCL_OK) {
+	// load the Tcl scripts.
+	if (tcl_load_scripts() != TCL_OK) {
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation"
 			" error: %s (irssi.tcl not found?)", tcl_str_error());
 	}
@@ -59,9 +61,9 @@ tcl_interp_init(void) {
  */
 void
 tcl_interp_deinit(void) {
-  if (interp) {
-    Tcl_DeleteInterp(interp);
-  }
+	if (interp) {
+		Tcl_DeleteInterp(interp);
+	}
 }
 
 /*
@@ -145,17 +147,27 @@ irssi_dir_ds(Tcl_DString* dsPtr, const char* str) {
 	Tcl_DStringAppend(dsPtr, str, -1);
 }
 
-//! load the tcl scripts
+//! load the tcl scripts.
 /*!
- * XXX: I think this is bugged in that we just load them rather than
- *   clear out loaded scripts and reload fresh.
+ * @return int TCL_OK if success
  */
 int
-tcl_reload_scripts(void) {
+tcl_load_scripts(void) {
 	Tcl_DString dsPtr;
 	Tcl_DStringInit(&dsPtr);
 	irssi_dir_ds(&dsPtr, "/tcl/irssi.tcl");
 	int result = Tcl_EvalFile(interp, Tcl_DStringValue(&dsPtr));
 	Tcl_DStringFree(&dsPtr);
 	return result;
+}
+
+//! reload the tcl scripts
+/*!
+ * @return int 1 success, -1 failure
+ *
+ * we restart the interpreter to do this.
+ */
+int
+tcl_reload_scripts(void) {
+	return tcl_interp_init();
 }
