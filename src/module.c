@@ -32,7 +32,7 @@ init_signals(void) {
 
 	signal_add_last("message public", (SIGNAL_FUNC) msg_pub);
 	signal_add_last("message own_public", (SIGNAL_FUNC) msg_own_pub);
-	signal_add_last("server sendmsg", server_sendmsg);
+	signal_add_last("server sendmsg", (SIGNAL_FUNC) server_sendmsg);
 }
 
 //! clear our signals.

@@ -4,7 +4,6 @@
  */
 
 #include <tcl.h>
-#include "module.h"
 #include "irssi_includes.h"
 #include "tcl_core.h"
 
