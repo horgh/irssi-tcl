@@ -2,11 +2,12 @@
 #ifndef __TCL_H
 #define __TCL_H
 
+#include <stdbool.h>
 #include <tcl.h>
 
 void
 tcl_register_commands(void);
-int
+bool
 tcl_interp_init(void);
 void
 tcl_interp_deinit(void);

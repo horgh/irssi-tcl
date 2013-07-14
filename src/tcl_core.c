@@ -3,10 +3,10 @@
  * Core Tcl functionality
  */
 
+#include <stdbool.h>
 #include <tcl.h>
 #include "tcl_commands.h"
 #include "tcl_core.h"
-#include "irssi_includes.h"
 #include "debug.h"
 
 static Tcl_Interp* interp;
@@ -23,17 +23,18 @@ tcl_register_commands(void) {
 	}
 }
 
-/*
- * Setup the Tcl interpreter
+//! Setup the Tcl interpreter
+/*!
+ * @return bool success
  */
-int
+bool
 tcl_interp_init(void) {
 	// first destroy the interpreter if one exists.
 	tcl_interp_deinit();
 
 	interp = Tcl_CreateInterp();
 	if (interp == NULL) {
-		return -1;
+		return false;
 	}
 	
 	// Allow "package require"s to work
@@ -48,11 +49,10 @@ tcl_interp_init(void) {
 
 	// load the Tcl scripts.
 	if (tcl_load_scripts() != TCL_OK) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Script initialisation"
-			" error: %s (irssi.tcl not found?)", tcl_str_error());
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 //! destroy the current tcl interpreter if it exists.
@@ -89,6 +89,9 @@ tcl_str_result(void) {
  */
 const char*
 tcl_str_error(void) {
+	if (!interp) {
+		return NULL;
+	}
 	const char* result = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
 	return result;
 }

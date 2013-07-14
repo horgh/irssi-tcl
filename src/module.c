@@ -9,13 +9,8 @@
 #include "irssi_includes.h"
 #include "module.h"
 #include "signals.h"
-#include "tcl_core.h"
 #include "irssi_commands.h"
-
-#ifdef DEBUG
-#include "debug.h"
-#endif
-
+#include "tcl_core.h"
 
 // bind Irssi /commands
 void
@@ -59,8 +54,17 @@ tcl_init(void) {
 	module_register(MODULE_NAME, "core");
 
 	if (!tcl_interp_init()) {
-		printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Interp init error");
-		return;
+		const char* const tcl_error = tcl_str_error();
+		if (tcl_error) {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Interpreter initialisation"
+				" error: %s", tcl_error);
+		} else {
+			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Interpreter initialisation"
+				" error.");
+		}
+		// continue on... while we cannot actually do much, since we do have
+		// the counterparts to these init commands/signals in the module deinit,
+		// I think it is wise to set them up as expected if possible.
 	}
 
 	init_commands();
