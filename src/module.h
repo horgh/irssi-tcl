@@ -3,8 +3,6 @@
 #ifndef __MODULE_H
 #define __MODULE_H
 
-#include "irssi_includes.h"
-
 void
 init_commands(void);
 void
@@ -13,8 +11,6 @@ void
 init_signals(void);
 void
 deinit_signals(void);
-void
-cmd_tcl(const char*, void*, WI_ITEM_REC*);
 
 void
 tcl_init(void);
