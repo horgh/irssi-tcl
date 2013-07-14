@@ -7,6 +7,7 @@
 #include "irssi_includes.h"
 #include "module.h"
 #include "tcl_commands.h"
+#include "irssi.h"
 
 /*
  * Return string corresponding to full path to ~/.irssi

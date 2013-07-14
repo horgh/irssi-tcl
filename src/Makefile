@@ -53,7 +53,7 @@ CFLAGS = \
 LINKS=-l$(TCL_LIB) -L$(LIB_DIR)
 INCLUDES=-I. $(TCL_INCLUDES) $(IRSSI_INCLUDES) $(GLIB2_INCLUDES)
 
-OBJS=signals.o tcl_commands.o module.o
+OBJS=signals.o tcl_commands.o module.o irssi.o
 TARGETS=libtcl.so
 
 all: $(TARGETS)

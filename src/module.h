@@ -34,9 +34,4 @@ tcl_init(void);
 void
 tcl_deinit(void);
 
-// misc useful functions
-void
-print_message_public(SERVER_REC*, CHANNEL_REC*,
-	char*, char*, char*, char*);
-
 #endif
