@@ -25,7 +25,7 @@ GLIB2_INCLUDES= \
 
 CC=gcc
 
-# -Wpadded generates from includes!
+# NOTE: -Wpadded generates from includes!
 CFLAGS = \
 	-shared \
 	-std=c11 -O1 -g -ggdb -pedantic -pedantic-errors \
@@ -50,19 +50,19 @@ CFLAGS = \
 	-Wwrite-strings -Waggregate-return \
 	-Wswitch-enum -Wconversion -Wunreachable-code
 
-DFLAGS=-DHAVE_CONFIG_H
 LINKS=-l$(TCL_LIB) -L$(LIB_DIR)
 INCLUDES=-I. $(TCL_INCLUDES) $(IRSSI_INCLUDES) $(GLIB2_INCLUDES)
 
 OBJS=signals.o tcl_commands.o module.o
+TARGETS=libtcl.so
 
-all: libtcl.so
+all: $(TARGETS)
 
 libtcl.so: $(OBJS)
-	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(DFLAGS) $(DEBUG)
+	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(DEBUG)
 
-%.o: %.c %.h
-	$(CC) $(INCLUDES) $(CFLAGS) -c $(DFLAGS) -o $@ $< $(DEBUG)
+%.o: %.c %.h Makefile irssi_includes.h debug.h
+	$(CC) $(INCLUDES) $(CFLAGS) -fPIC -c -o $@ $< $(DEBUG)
 
 install: libtcl.so
 	mkdir -p $(HOME)/.irssi/modules
@@ -75,4 +75,4 @@ install: libtcl.so
 	fi
 
 clean:
-	rm -f libtcl.so $(OBJS)
+	rm -f $(TARGETS) $(OBJS)
