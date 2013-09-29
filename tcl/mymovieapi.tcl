@@ -89,6 +89,16 @@ proc ::mma::output_search_result {server chan data} {
 proc ::mma::output_search {server chan data} {
 	::mma::log "output_search: in output_search"
 
+	# we may have an error (such as no result).
+	# we receive an error if this is not a dict (such as when
+	# we have results) so wrap it in a catch.
+	if {![catch {dict exists $data error} exists]} {
+		# error exists.
+		set error [dict get $data error]
+		putchan $server $chan "Error: $error"
+		return
+	}
+
 	foreach result $data {
 		::mma::output_search_result $server $chan $result
 	}
