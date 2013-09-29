@@ -111,9 +111,22 @@ proc ::mma::search_cb {server chan token} {
 	::mma::log "search_db: data: $data"
 	::http::cleanup $token
 
+	# json2dict can return success if we receive an html page
+	# (not sure why - some garbage input causes errors to be raised)
+	# where the resulting 'dict' is just '7'. so run a quick
+	# check if we receive what looks to be html - we receive an html
+	# response if the api is down (cloudflare).
+	set data [string trim $data]
+	if {[string index $data 0] == "<"} {
+		::mma::log "search_cb: response looks like html"
+		putchan $server $chan "API appears to be down."
+		return
+	}
+
 	# convert the json response.
 	if {[catch {::json::json2dict $data} data]} {
-		::mma::log "search_cb: failure converting to json"
+		::mma::log "search_cb: failure converting to json: $data"
+	  putchan $server $chan "Failed to parse the response"
 		return
 	}
 	::mma::log "search_cb: json $data"
@@ -122,7 +135,13 @@ proc ::mma::search_cb {server chan token} {
 	# TODO
 
 	# generate output.
-	::mma::output_search $server $chan $data
+	# wrap in a catch since it is possible for the dict to not
+	# be as we expect and generate errors.
+	if {[catch {::mma::output_search $server $chan $data} err]} {
+		::mma::log "search_cb: failure outputting result(s): $err"
+		putchan $server $chan "Failed to generate the output"
+		return
+	}
 }
 
 # perform an api search and output to the server & channel.
@@ -153,6 +172,11 @@ proc ::mma::search {server chan argv} {
 # argv is the search parameter.
 proc ::mma::pub_handler {server nick uhost chan argv} {
 	if {![str_in_settings_str "mymovieapi_enabled_channels" $chan]} {
+		return
+	}
+	set argv [string trim $argv]
+	if {$argv == ""} {
+		putchan $server $chan "Usage: .imdb <query>"
 		return
 	}
 	::mma::search $server $chan $argv
