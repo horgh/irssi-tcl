@@ -100,3 +100,9 @@ See docs/scripting.md.
 # 8. Using (edited) eggdrop scripts
 
 See docs/eggdrop\_scripts.md.
+
+
+# 9. Sample scripts
+
+There are some sample scripts for this module in the repository
+'irssi-tcl-scripts'.
