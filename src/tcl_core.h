@@ -23,7 +23,7 @@ void
 irssi_dir_ds(Tcl_DString*, const char*);
 int
 tcl_load_scripts(void);
-int
+bool
 tcl_reload_scripts(void);
 
 #endif

@@ -193,11 +193,11 @@ tcl_load_scripts(void) {
 
 //! reload the tcl scripts
 /*!
- * @return int 1 success, -1 failure
+ * @return bool whether successful
  *
  * we restart the interpreter to do this.
  */
-int
+bool
 tcl_reload_scripts(void) {
 	return tcl_interp_init();
 }

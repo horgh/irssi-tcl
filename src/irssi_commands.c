@@ -23,7 +23,7 @@ cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
 
 	// /tcl reload
 	if (strcmp(data, "reload") == 0) {
-		if (tcl_reload_scripts() == TCL_OK) {
+		if (tcl_reload_scripts()) {
 			printtext(NULL, NULL, MSGLEVEL_CRAP, "Tcl: Scripts reloaded");
 		} else {
 			const char* const tcl_error = tcl_str_error();
