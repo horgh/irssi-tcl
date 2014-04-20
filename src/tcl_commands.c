@@ -3,11 +3,15 @@
  * Commands available in the Tcl interpreter
  */
 
+#include <stdbool.h>
+
 #include <tcl.h>
 #include "irssi_includes.h"
 #include "tcl_commands.h"
 #include "tcl_core.h"
 #include "irssi.h"
+
+static bool __tcl_command_free_tcl_list(Tcl_Interp*, Tcl_Obj*);
 
 /*
  * Return string corresponding to full path to ~/.irssi
@@ -315,5 +319,99 @@ settings_add_str_tcl(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_Obj* const def = objv[2];
 
 	settings_add_str("tcl", Tcl_GetString(key), Tcl_GetString(def));
+	return TCL_OK;
+}
+
+/*
+ * Utility function to free a Tcl list object's elements.
+ *
+ * We do this by decrementing reference count of all referenced elements.
+ * Note we do not decrement the reference counter of the list object. You
+ * need to do that yourself if necessary.
+ *
+ * TODO: is there an existing Tcl library function to do this more easily?
+ */
+static bool __tcl_command_free_tcl_list(Tcl_Interp* interp, Tcl_Obj* list)
+{
+	if (!list) {
+		return false;
+	}
+
+	// find how many elements in the list to remove.
+	int count = 0;
+	if (Tcl_ListObjLength(interp, list, &count) != TCL_OK) {
+		return false;
+	}
+	if (Tcl_ListObjReplace(interp, list, 0, count, 0, NULL) != TCL_OK) {
+		return false;
+	}
+	return true;
+}
+
+/*
+ * Command: nicklist_getnicks <server tag> <channel>
+ *
+ * Retrieve the nicks in a channel.
+ */
+int
+tcl_command_nicklist_getnicks(ClientData clientData, Tcl_Interp* interp,
+	int objc, Tcl_Obj* const objv[])
+{
+	(void) clientData;
+	if (objc != 3) {
+		Tcl_Obj* str = Tcl_ObjPrintf("wrong # args: should be \"nicklist_getnicks"
+				" server_tag channel\"");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	Tcl_Obj* const server_tag = objv[1];
+	Tcl_Obj* const channel_name = objv[2];
+
+	// find the server.
+	SERVER_REC* server_rec = server_find_tag(Tcl_GetString(server_tag));
+	if (!server_rec) {
+		Tcl_Obj* str = Tcl_ObjPrintf("server with tag '%s' not found",
+			Tcl_GetString(server_tag));
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	// find the channel on this server.
+	CHANNEL_REC* channel_rec = channel_find(server_rec,
+		Tcl_GetString(channel_name));
+	if (!channel_rec) {
+		Tcl_Obj* str = Tcl_ObjPrintf("channel '%s' not found on server '%s'",
+			Tcl_GetString(channel_name), Tcl_GetString(server_tag));
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	// get the nicks as a list.
+	Tcl_Obj* list = Tcl_NewListObj(0, NULL);
+	if (!list) {
+		Tcl_Obj* str = Tcl_ObjPrintf("failed to create list");
+		Tcl_SetObjResult(interp, str);
+		return TCL_ERROR;
+	}
+	GSList* nicks = nicklist_getnicks(channel_rec);
+	for (GSList* nick_ptr = nicks; nick_ptr; nick_ptr = nick_ptr->next) {
+		NICK_REC* nick = nick_ptr->data;
+		// TODO: encoding issues?
+		Tcl_Obj* nick_str = Tcl_NewStringObj(nick->nick, -1);
+		if (!nick_str) {
+			Tcl_Obj* str = Tcl_ObjPrintf("failed to create nick string");
+			Tcl_SetObjResult(interp, str);
+			__tcl_command_free_tcl_list(interp, list);
+			g_slist_free(nicks);
+			return TCL_ERROR;
+		}
+		if (Tcl_ListObjAppendElement(interp, list, nick_str) != TCL_OK) {
+			Tcl_Obj* str = Tcl_ObjPrintf("failed to append to list: %s");
+			Tcl_SetObjResult(interp, str);
+			__tcl_command_free_tcl_list(interp, list);
+			g_slist_free(nicks);
+			return TCL_ERROR;
+		}
+	}
+	g_slist_free(nicks);
+	Tcl_SetObjResult(interp, list);
 	return TCL_OK;
 }
