@@ -51,7 +51,7 @@ See the script for more information.
 The script ./utils/eggdrop_convert_putchan.tcl can be used to convert some
 cases of putserv to putchan.
 See the script for more information.
- 
+
 
 ## b). Change `[channel get $channel value]` to
    `[str_in_settings_str value $channel]`

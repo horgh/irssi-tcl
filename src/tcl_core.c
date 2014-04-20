@@ -45,7 +45,7 @@ tcl_interp_init(void) {
 	if (interp == NULL) {
 		return false;
 	}
-	
+
 	// Allow "package require"s to work
 	Tcl_Init(interp);
 	Tcl_SetServiceMode(TCL_SERVICE_ALL);

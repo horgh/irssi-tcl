@@ -35,7 +35,7 @@
     This command does not deal with newlines.
     Newlines will appear to
     indicate a new command to the IRC server.
-   
+
     Output is not shown on the Irssi client side
 
   * `putserv <server_tag> <text>`

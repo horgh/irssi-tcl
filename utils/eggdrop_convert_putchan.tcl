@@ -23,7 +23,7 @@ foreach line [split $data \n] {
 	# -> putchan $server $chan "text.."
 	if {[regexp -- {(\t*?)?putserv \$server "PRIVMSG \$chan :(.*?)"} $line -> tabs text]} {
 		puts "${tabs}putchan \$server \$chan \"$text\""
-	
+
 	# ::output_cmd -> putchan
 	} elseif {[regexp -- {(\t*?)?(\S*?::output_cmd) \$server "PRIVMSG \$chan :(.*?)"} $line -> tabs cmd text]} {
 		puts "${tabs}putchan \$server \$chan \"$text\""

@@ -48,7 +48,7 @@ print_message_public(SERVER_REC* server_rec, CHANNEL_REC* channel_rec,
 	if (!from_me && hilight) {
 		msg_level |= MSGLEVEL_HILIGHT;
 	}
-	
+
 	if (should_print_channel) {
 		if (from_me) {
 			printformat_module("fe-common/core", server_rec, target, msg_level,
