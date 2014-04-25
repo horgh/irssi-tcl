@@ -391,6 +391,7 @@ tcl_command_nicklist_getnicks(ClientData clientData, Tcl_Interp* interp,
 		Tcl_SetObjResult(interp, str);
 		return TCL_ERROR;
 	}
+
 	GSList* nicks = nicklist_getnicks(channel_rec);
 	for (GSList* nick_ptr = nicks; nick_ptr; nick_ptr = nick_ptr->next) {
 		NICK_REC* nick = nick_ptr->data;
@@ -404,7 +405,8 @@ tcl_command_nicklist_getnicks(ClientData clientData, Tcl_Interp* interp,
 			return TCL_ERROR;
 		}
 		if (Tcl_ListObjAppendElement(interp, list, nick_str) != TCL_OK) {
-			Tcl_Obj* str = Tcl_ObjPrintf("failed to append to list: %s");
+			Tcl_Obj* str = Tcl_ObjPrintf("failed to append to list: '%s'", 
+				Tcl_GetString(nick_str));
 			Tcl_SetObjResult(interp, str);
 			__tcl_command_free_tcl_list(interp, list);
 			g_slist_free(nicks);
