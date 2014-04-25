@@ -393,8 +393,7 @@ tcl_command_nicklist_getnicks(ClientData clientData, Tcl_Interp* interp,
 	}
 
 	GSList* nicks = nicklist_getnicks(channel_rec);
-	GSList* nick_ptr;
-	for (nick_ptr = nicks; nick_ptr; nick_ptr = nick_ptr->next) {
+	for (GSList* nick_ptr = nicks; nick_ptr; nick_ptr = nick_ptr->next) {
 		NICK_REC* nick = nick_ptr->data;
 		// TODO: encoding issues?
 		Tcl_Obj* nick_str = Tcl_NewStringObj(nick->nick, -1);
