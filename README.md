@@ -3,15 +3,22 @@
 To build/use the module you need:
 
   * Irssi and Irssi development files
+    * Debian packages: irssi irssi-dev
   * glib2 and glib2 development files
+    * Debian packages: libglib2.0-0 libglib2.0-dev
   * Tcl 8.5+ and Tcl 8.5+ development files
+    * Debian packages: tcl8.5-dev tcl8.5
   * GNU Make (gmake)
+    * Debian packages: build-essential (well this will get what Make
+      among other things)
 
 It's possible it will work with older Tcl versions, but I haven't tested. Nor
 have I tested with higher than 8.5.x actually.
 
 
 # 2. Building
+
+These commands must be run in the src directory.
 
 Linux:
 

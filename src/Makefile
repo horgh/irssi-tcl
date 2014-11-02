@@ -10,6 +10,8 @@ IRSSI_DIR=/usr/include/irssi
 # also used /usr/lib/glib-2.0 in the past.
 GLIB2_DIR=/usr/include/glib-2.0
 GLIB2_DIR_2=/usr/lib/i386-linux-gnu/glib-2.0
+# for debian 64bit, use this:
+#GLIB2_DIR_2=/usr/lib/x86_64-linux-gnu/glib-2.0
 LIB_DIR=/usr/lib
 TCL_LIB=tcl8.5
 
