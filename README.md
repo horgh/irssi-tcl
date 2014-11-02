@@ -9,7 +9,7 @@ To build/use the module you need:
   * Tcl 8.5+ and Tcl 8.5+ development files
     * Debian packages: tcl8.5-dev tcl8.5
   * GNU Make (gmake)
-    * Debian packages: build-essential (well this will get what Make
+    * Debian packages: build-essential (well this will get Make
       among other things)
 
 It's possible it will work with older Tcl versions, but I haven't tested. Nor
