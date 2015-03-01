@@ -149,6 +149,8 @@ putchan_raw(ClientData clientData, Tcl_Interp* interp, int objc,
 	Tcl_AppendObjToObj(send_str, msg);
 
 	// send the command to the server.
+	// from ByteArrObj docs:
+	// "Obtaining the string representation of a byte-array object (by calling Tcl_GetStringFromObj) produces a properly formed UTF-8 sequence with a one-to-one mapping between the bytes in the internal representation and the UTF-8 characters in the string representation."
 	irc_send_cmd((IRC_SERVER_REC*) server_rec, Tcl_GetString(send_str));
 	// this frees the object. unsure if I actually need to call this, but it
 	// seems like it doesn't matter if I do!
