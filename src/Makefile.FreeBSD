@@ -4,6 +4,7 @@
 TCL_DIR=/usr/local/include/tcl8.6
 IRSSI_DIR=/usr/local/include/irssi
 GLIB2_DIR=/usr/local/include/glib-2.0
+GLIB2_ALSO=/usr/local/lib/glib-2.0/include/
 LIB_DIR=/usr/local/lib
 TCL_LIB=tcl86
 
@@ -12,7 +13,7 @@ IRSSI_INCLUDES= \
 	-I$(IRSSI_DIR) -I$(IRSSI_DIR)/src -I$(IRSSI_DIR)/src/core \
 	-I$(IRSSI_DIR)/src/fe-common/core -I$(IRSSI_DIR)/src/irc/core \
 
-GLIB2_INCLUDES=-I$(GLIB2_DIR) -I$(GLIB2_DIR)/glib
+GLIB2_INCLUDES=-I$(GLIB2_DIR) -I$(GLIB2_DIR)/glib -I$(GLIB2_ALSO)
 
 CC=gcc
 CFLAGS=-shared -Wall -std=c99
