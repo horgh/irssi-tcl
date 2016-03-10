@@ -17,4 +17,9 @@ tcl_init(void);
 void
 tcl_deinit(void);
 
+#ifdef IRSSI_ABI_VERSION
+void
+tcl_abicheck(int *);
+#endif
+
 #endif

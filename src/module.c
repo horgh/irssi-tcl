@@ -80,3 +80,13 @@ tcl_deinit(void) {
 	deinit_commands();
 	deinit_signals();
 }
+
+#ifdef IRSSI_ABI_VERSION
+/*
+ * Irssi abi check
+ */
+void
+tcl_abicheck(int * version) {
+	*version = IRSSI_ABI_VERSION;
+}
+#endif
