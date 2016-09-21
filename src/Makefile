@@ -5,6 +5,10 @@
 #
 
 TCL_DIR=/usr/include/tcl8.6
+
+# To compile against a git checkout of irssi, change this value.
+# e.g.,
+#IRSSI_DIR=/home/will/bin/irssi.git
 IRSSI_DIR=/usr/include/irssi
 
 # also used /usr/lib/glib-2.0 in the past.
