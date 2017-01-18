@@ -55,12 +55,12 @@ cases of putserv to putchan. See the script for more information.
 
 ## Change `[channel get $channel value]`
 To `[str_in_settings_str value $channel]`. This is to replace channel
-`+enable`\'d values for channels with lists of channels via `/set`.
+`+enable`'d values for channels with lists of channels via `/set`.
 
 
 ## Change `setudef flag <value>`
 Instead use `settings_add_str "value" ""` or some other `/settings` type.
-Combine with b) to use.
+Combine with the `str_in_settings_str` command to use the setting.
 
 
 ## Change `bind type flag trigger function`

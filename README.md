@@ -9,7 +9,7 @@ Eggdrop scripts to run on Irssi.
 It also solved a particular problem I had where I wanted to easily use
 non-blocking I/O, such as for HTTP requests. Tcl supports this pattern very
 easily through its event loop. This makes using Tcl through this module an easy
-way to talk HTTP servers.
+way to talk to HTTP servers.
 
 The module works by loading a Tcl interpreter into Irssi. You can use th `/tcl`
 command to interact with this interpreter. The module also supports loading
