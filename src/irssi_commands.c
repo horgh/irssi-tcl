@@ -16,10 +16,19 @@
  * /tcl reload
  */
 void
-cmd_tcl(const char* data, void* server, WI_ITEM_REC* item) {
-	// XXX: why do we pass these if we don't need them?
-	(void) server;
-	(void) item;
+cmd_tcl(
+		char const * data,
+		const void * unused2,
+		const void * unused3,
+		void const * unused4,
+		void const * unused5,
+		void const * unused6
+) {
+	(void) unused2;
+	(void) unused3;
+	(void) unused4;
+	(void) unused5;
+	(void) unused6;
 
 	// /tcl reload
 	if (strcmp(data, "reload") == 0) {

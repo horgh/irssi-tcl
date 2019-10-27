@@ -28,7 +28,18 @@ time_change(void) {
 	This is called when a user hits enter with a line in a window
 */
 void
-send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
+send_text(
+		char const * line,
+		SERVER_REC * server,
+		WI_ITEM_REC * item,
+		void const * unused4,
+		void const * unused5,
+		void const * unused6
+) {
+	(void) unused4;
+	(void) unused5;
+	(void) unused6;
+
 	int result;
 	// Have to do this check as window_item_get_target() is invalid if so
 	if (item != NULL) {
@@ -58,9 +69,16 @@ send_text(char* line, SERVER_REC* server, WI_ITEM_REC* item) {
  * Called when "message public" signal from Irssi
  */
 void
-msg_pub(SERVER_REC* server, char* msg, const char* nick,
-	const char* address, const char* target)
+msg_pub(
+		SERVER_REC* server,
+		char* msg,
+		const char* nick,
+		const char* address,
+		const char* target,
+		void const * unused6)
 {
+	(void) unused6;
+
 	if (TCL_OK != execute(6, "emit_msg_pub", server->tag, nick, address,
 		target, msg))
 	{
@@ -81,7 +99,18 @@ msg_pub(SERVER_REC* server, char* msg, const char* nick,
 	Triggers on our own public messages
 */
 void
-msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
+msg_own_pub(
+		SERVER_REC* server_rec,
+		char* msg,
+		char* target,
+		void const * unused4,
+		void const * unused5,
+		void const * unused6
+) {
+	(void) unused4;
+	(void) unused5;
+	(void) unused6;
+
 	if (TCL_OK != execute(6, "emit_msg_pub", server_rec->tag,
 		server_rec->nick, "", target, msg))
 	{
@@ -102,11 +131,21 @@ msg_own_pub(SERVER_REC* server_rec, char* msg, char* target) {
  * NOTE: This includes msgs to channels (type = 0), and nicks (type = 1)
  */
 void
-server_sendmsg(SERVER_REC* server, char* target, char* msg, int type) {
+server_sendmsg(
+		SERVER_REC* server,
+		char* target,
+		char* msg,
+		void const * unused4,
+		void const * unused5,
+		void const * unused6
+) {
 	(void) server;
 	(void) target;
 	(void) msg;
-	(void) type;
+	(void) unused4;
+	(void) unused5;
+	(void) unused6;
+
 	// public msg
 
 	// Used to trigger on own messages from here

@@ -6,6 +6,13 @@
 #include "irssi_includes.h"
 
 void
-cmd_tcl(const char*, void*, WI_ITEM_REC*);
+cmd_tcl(
+		char const *,
+		void const *,
+		void const *,
+		void const *,
+		void const *,
+		void const *
+);
 
 #endif
