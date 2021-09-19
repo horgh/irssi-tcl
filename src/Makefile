@@ -58,7 +58,7 @@ TARGETS=libtcl.so
 all: $(TARGETS)
 
 libtcl.so: $(OBJS)
-	$(CC) $(LINKS) $(INCLUDES) $(CFLAGS) $(OBJS) -o $@ $(DEBUG)
+	$(CC) $(INCLUDES) $(CFLAGS) $(OBJS) $(LINKS) -o $@ $(DEBUG)
 
 %.o: %.c %.h Makefile irssi_includes.h debug.h
 	$(CC) $(INCLUDES) $(CFLAGS) -fPIC -c -o $@ $< $(DEBUG)
