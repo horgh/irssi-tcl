@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '3 21 * * SUN'
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tcl-tag: core-8-6-branch
+            tcl-lib: tcl8.6
+          - tcl-tag: core-9-0-branch
+            tcl-lib: tcl9.0
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y irssi-dev libglib2.0-dev pkg-config
+
+      - name: Setup Tcl
+        uses: apnadkarni/tcl-setup@627f11d1bb075e75db946fe5816929a670d20e0c # v2
+        with:
+          tcl-tag: ${{ matrix.tcl-tag }}
+
+      - name: Build
+        run: |
+          make -C src \
+            TCL_DIR=$TCLGA_INSTALL/include \
+            LIB_DIR=$TCLGA_INSTALL/lib \
+            TCL_LIB=${{ matrix.tcl-lib }}
