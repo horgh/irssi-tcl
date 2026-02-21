@@ -6,6 +6,9 @@
 #include <stdbool.h>
 
 #include <tcl.h>
+#ifndef TCL_SIZE_MAX
+typedef int Tcl_Size;
+#endif
 #include "irssi_includes.h"
 #include "tcl_commands.h"
 #include "tcl_core.h"
@@ -340,7 +343,7 @@ static bool __tcl_command_free_tcl_list(Tcl_Interp* interp, Tcl_Obj* list)
 	}
 
 	// find how many elements in the list to remove.
-	int count = 0;
+	Tcl_Size count = 0;
 	if (Tcl_ListObjLength(interp, list, &count) != TCL_OK) {
 		return false;
 	}
